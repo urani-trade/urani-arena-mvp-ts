@@ -9,8 +9,8 @@ import { Sidebar, SidebarBody, SidebarHeader, SidebarItem, SidebarLabel, Sidebar
 import { SparklesIcon } from '@heroicons/react/20/solid'
 
 const navItems = [
-  { label: 'Live Arena', url: '/' },
-  { label: 'Leaderboard', url: '/events' },
+  { label: 'Live Arena', url: '/arena' },
+  { label: 'Leaderboard', url: '/leaderboard' },
   { label: 'Order Explorer', url: '/orders' },
   { label: 'Stats', url: '/stats' },
 ]
