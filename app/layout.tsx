@@ -7,7 +7,6 @@ import Image from "next/image";
 import { StackedLayout } from '@/components/stacked-layout'
 import { Navbar, NavbarItem, NavbarLabel, NavbarSection, NavbarDivider, NavbarSpacer } from '@/components/navbar'
 import { Sidebar, SidebarBody, SidebarHeader, SidebarItem, SidebarLabel, SidebarSection } from '@/components/sidebar'
-import Footer from '@/components/footer'
 
 import { SparklesIcon } from '@heroicons/react/20/solid'
 
