@@ -3,6 +3,8 @@ import { TokenTransferGraph } from '@/components/token-transfer-graph/token-tran
 
 export default function Arena() {
   return (
-    <TokenTransferGraph />
+    <div className="max-h-80">
+      <TokenTransferGraph />
+    </div>
   )
 }
