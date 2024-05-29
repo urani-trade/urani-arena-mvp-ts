@@ -10,7 +10,7 @@ const navItems = [
   { label: 'Order Explorer', url: '/orders' },
 ]
 
-export default function Arena({ children }) {
+export default function Arena({ children }: { children: React.ReactNode }) {
   return (
     <StackedLayout
       navbar={
