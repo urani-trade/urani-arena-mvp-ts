@@ -48,8 +48,7 @@ export default function RootLayout({
                 <img src="/urani.svg" />
                 <NavbarLabel>Urani</NavbarLabel>
               </NavbarItem>
-            <NavbarDivider className="max-lg:hidden mr-10" />
-            <NavbarSection className="max-lg:hidden">
+            <NavbarSection className="max-lg:hidden ml-10">
               {navItems.map(({ label, url }) => (
                 <NavbarItem key={label} href={url}>
                   {label}
@@ -92,8 +91,7 @@ export default function RootLayout({
               <NavbarItem className="max-lg:hidden">
                 Think Infinite © Urani, Inc. 2024
               </NavbarItem>
-              <NavbarDivider className="max-lg:hidden mr-10" />
-              <NavbarSection className="max-lg:hidden">
+              <NavbarSection className="max-lg:hidden ml-10">
                 {footerItems.map(({ label, url }) => (
                   <NavbarItem key={label} href={url}>
                     {label}
