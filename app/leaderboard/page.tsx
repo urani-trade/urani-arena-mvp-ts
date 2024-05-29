@@ -1,24 +1,45 @@
-// pages/leaderboard.tsx
-import React from 'react';
-import { TrophyIcon } from '@heroicons/react/20/solid';
+"use client";
+
+import React, { useState } from 'react';
+import { TrophyIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
 
 interface Player {
-  rank: number;
   name: string;
-  score: number;
+  batches: number;
+  volume: number;
+  surplus: number;
 }
 
 const leaderboardData: Player[] = [
-  { rank: 1, name: 'Alice', score: 1500 },
-  { rank: 2, name: 'Bob', score: 1400 },
-  { rank: 3, name: 'Charlie', score: 1300 },
-  { rank: 4, name: 'Dave', score: 1200 },
-  { rank: 5, name: 'Eve', score: 1100 },
+  { name: 'Alice', batches: 150, volume: 3000, surplus: 500 },
+  { name: 'Bob', batches: 140, volume: 3200, surplus: 400 },
+  { name: 'Charlie', batches: 130, volume: 3100, surplus: 450 },
+  { name: 'Dave', batches: 120, volume: 2900, surplus: 420 },
+  { name: 'Eve', batches: 110, volume: 2800, surplus: 380 },
 ];
 
 const season = "Season 1";
 
 const Leaderboard: React.FC = () => {
+  const [sortKey, setSortKey] = useState<'batches' | 'volume' | 'surplus'>('batches');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const sortedData = [...leaderboardData].sort((a, b) => {
+    const order = sortOrder === 'asc' ? 1 : -1;
+    if (a[sortKey] < b[sortKey]) return -1 * order;
+    if (a[sortKey] > b[sortKey]) return 1 * order;
+    return 0;
+  });
+
+  const handleSort = (key: 'batches' | 'volume' | 'surplus') => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortOrder('asc');
+    }
+  };
+
   return (
     <div className="mt-20 flex flex-col items-center justify-center p-4 space-y-6">
       <h1 className="text-4xl font-bold mb-4 text-center text-white">
@@ -32,29 +53,81 @@ const Leaderboard: React.FC = () => {
           <table className="w-full text-left text-white">
             <thead className="rounded-lg">
               <tr className="bg-gradient-radial from-zinc-800 to-zinc-850 rounded-lg">
-                <th className="px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold">Rank</th>
                 <th className="px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold">Name</th>
-                <th className="px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold">Score</th>
+                <th
+                  className="px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold cursor-pointer"
+                  onClick={() => handleSort('batches')}
+                >
+                  <div className="flex items-center">
+                    Batches
+                    <span className="ml-1 w-4 h-4">
+                      {sortKey === 'batches' && (
+                        sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="w-4 h-4" />
+                        ) : (
+                          <ChevronDownIcon className="w-4 h-4" />
+                        )
+                      )}
+                    </span>
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold cursor-pointer"
+                  onClick={() => handleSort('volume')}
+                >
+                  <div className="flex items-center">
+                    Volume
+                    <span className="ml-1 w-4 h-4">
+                      {sortKey === 'volume' && (
+                        sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="w-4 h-4" />
+                        ) : (
+                          <ChevronDownIcon className="w-4 h-4" />
+                        )
+                      )}
+                    </span>
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold cursor-pointer"
+                  onClick={() => handleSort('surplus')}
+                >
+                  <div className="flex items-center">
+                    Surplus
+                    <span className="ml-1 w-4 h-4">
+                      {sortKey === 'surplus' && (
+                        sortOrder === 'asc' ? (
+                          <ChevronUpIcon className="w-4 h-4" />
+                        ) : (
+                          <ChevronDownIcon className="w-4 h-4" />
+                        )
+                      )}
+                    </span>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
-              {leaderboardData.map((player, index) => (
+              {sortedData.map((player, index) => (
                 <tr
-                  key={player.rank}
+                  key={player.name}
                   className={`hover:bg-gray-700 transition-colors duration-200 ${
                     index === 0 ? 'first:rounded-tl-lg first:rounded-tr-lg' : ''
                   } ${
-                    index === leaderboardData.length - 1 ? 'last:rounded-bl-lg last:rounded-br-lg' : ''
+                    index === sortedData.length - 1 ? 'last:rounded-bl-lg last:rounded-br-lg' : ''
                   }`}
                 >
-                  <td className={`px-4 py-2 ${index !== leaderboardData.length - 1 ? 'border-b border-gray-800' : ''}`}>
-                    {player.rank}
-                  </td>
-                  <td className={`px-4 py-2 ${index !== leaderboardData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                  <td className={`px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
                     {player.name}
                   </td>
-                  <td className={`px-4 py-2 ${index !== leaderboardData.length - 1 ? 'border-b border-gray-800' : ''}`}>
-                    {player.score}
+                  <td className={`px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                    {player.batches}
+                  </td>
+                  <td className={`px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                    ${player.volume.toLocaleString()}
+                  </td>
+                  <td className={`px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                    ${player.surplus.toLocaleString()}
                   </td>
                 </tr>
               ))}
