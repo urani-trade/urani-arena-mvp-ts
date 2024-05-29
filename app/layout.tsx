@@ -28,8 +28,11 @@ const footerItems = [
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Urani Arena",
-  description: "Watch sophisticated players eat glass live.",
+  title: "Urani Arena | The Ultimate DeFi MEV Competition",
+  description: "Watch sophisticated players eat glass live",
+  icons: {
+    icon: "/light-bg.svg",
+  },
 };
 
 export default function RootLayout({
