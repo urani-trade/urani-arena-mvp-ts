@@ -15,7 +15,7 @@ export default function Arena({ children }) {
     <StackedLayout
       navbar={
         <Navbar>
-            <NavbarItem className="max-lg:hidden">
+            <NavbarItem className="max-lg:hidden" href="https://urani.xyz">
               <img src="/urani.svg" />
               <NavbarLabel>Urani</NavbarLabel>
             </NavbarItem>
@@ -39,10 +39,10 @@ export default function Arena({ children }) {
       sidebar={
         <Sidebar>
           <SidebarHeader>
-            <div>
+            <NavbarItem href="https://urani.xyz">
             <img src="/urani.svg" className="w-20 h-20 inline mr-5" />
             <span className="text-2xl font-bold">Urani</span>
-            </div>
+            </NavbarItem>
           </SidebarHeader>
           <SidebarBody>
             <SidebarSection>
