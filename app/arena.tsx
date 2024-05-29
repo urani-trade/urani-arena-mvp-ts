@@ -8,6 +8,7 @@ const navItems = [
   { label: 'Live Arena', url: '/' },
   { label: 'Leaderboard', url: '/events' },
   { label: 'Order Explorer', url: '/orders' },
+  { label: 'Stats', url: '/stats' },
 ]
 
 export default function Arena({ children }: { children: React.ReactNode }) {
@@ -19,7 +20,7 @@ export default function Arena({ children }: { children: React.ReactNode }) {
               <img src="/urani.svg" />
               <NavbarLabel>Urani</NavbarLabel>
             </NavbarItem>
-          <NavbarDivider className="max-lg:hidden" />
+          <NavbarDivider className="max-lg:hidden mr-10" />
           <NavbarSection className="max-lg:hidden">
             {navItems.map(({ label, url }) => (
               <NavbarItem key={label} href={url}>
