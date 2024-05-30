@@ -5,12 +5,12 @@ import * as d3 from 'd3';
 import './token-transfer-graph.css';
 
 export const TokenTransferGraph = () => {
-    const [data, setData] = useState(null);
+    const [graphData, setGraphData] = useState(null);
     const graphRef = useRef(null);
 
     useEffect(() => {
         // Hardcoded data equivalent to the given data.csv, with graph name as part of each dictionary
-        const graphData = [
+        const data = [
             {
                 name: "SOL",
                 nodes: ["Harry", "Mario", "Sarah", "Alice", "Eveie", "Peter", "James", "Roger"],
@@ -66,6 +66,12 @@ export const TokenTransferGraph = () => {
             }
         ];
 
+        setGraphData(data);
+    }, []);
+
+    useEffect(() => {
+        if (!graphData) return;
+
         // Flatten the nodes and links arrays for D3
         const nodes = [];
         const links = [];
@@ -84,12 +90,6 @@ export const TokenTransferGraph = () => {
             });
         });
 
-        setData({ nodes, links });
-    }, []);
-
-    useEffect(() => {
-        if (!data) return;
-
         const container = d3.select(graphRef.current);
         container.select("svg").remove(); // Remove any existing SVG to avoid duplicates
         const { width, height } = container.node().getBoundingClientRect();
@@ -101,8 +101,8 @@ export const TokenTransferGraph = () => {
         const centerX = viewBoxWidth / 2;
         const centerY = viewBoxHeight / 2;
 
-        const simulation = d3.forceSimulation(data.nodes)
-            .force("link", d3.forceLink(data.links).id(d => d.name).distance(160))
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.name).distance(160))
             .force("charge", d3.forceManyBody().strength(-2000))
             .force("center", d3.forceCenter(centerX, centerY))
             .force("gravity", d3.forceRadial(0.5, centerX, centerY))
@@ -141,7 +141,7 @@ export const TokenTransferGraph = () => {
 
         // Add the links and the arrows
         const path = g.append("g").selectAll("path")
-            .data(data.links)
+            .data(links)
             .enter().append("path")
             .attr("class", "link")
             .attr("marker-end", "url(#end)")
@@ -149,7 +149,7 @@ export const TokenTransferGraph = () => {
 
         // Add the link labels
         const linkLabels = g.append("g").selectAll(".link-label")
-            .data(data.links)
+            .data(links)
             .enter().append("text")
             .attr("class", "link-label")
             .attr("dy", ".35em")
@@ -158,29 +158,13 @@ export const TokenTransferGraph = () => {
 
         // Define the nodes
         const node = g.selectAll(".node")
-            .data(data.nodes)
+            .data(nodes)
             .enter().append("g")
             .attr("class", "node")
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
-                .on("end", dragended))
-            .on("click", function(event, d) {
-                const clickedGraph = d.graph;
-
-                // Disable tangential force
-                simulation.force("tangential", null);
-
-                // Apply a strong radial force outward to non-clicked nodes
-                simulation.force("radialOutward", d3.forceRadial(1000, centerX, centerY)
-                    .strength(d => d.graph === clickedGraph ? 0 : 0.01));
-
-                // Apply a strong radial force inward to clicked nodes
-                simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
-                    .strength(d => d.graph === clickedGraph ? 0.2 : 0));
-
-                simulation.alpha(1).restart();
-            });
+                .on("end", dragended));
 
         // Add the wide outlined rectangles for the nodes
         node.append("rect")
@@ -197,6 +181,9 @@ export const TokenTransferGraph = () => {
             .attr("dy", ".35em")
             .style("fill", "green")
             .text(d => `${d.name} (${d.graph})`); // Modified to include graph name
+
+        // Initialize the hull paths
+        let hullPath = g.selectAll(".hull");
 
         function tick() {
             node.attr("transform", d => `translate(${d.x},${d.y})`);
@@ -230,6 +217,37 @@ export const TokenTransferGraph = () => {
                     const delta = calculatePerpendicularOffset(d, offset);
                     return (d.source.y + d.target.y) / 2 + delta.dy;
                 });
+
+            // Update hulls
+            const hulls = d3.groups(nodes, d => d.graph).map(([graph, nodes]) => {
+                const points = nodes.map(node => [node.x, node.y]);
+                const hull = d3.polygonHull(points);
+                return { graph, hull };
+            });
+
+            hullPath = hullPath.data(hulls)
+                .join("path")
+                .attr("class", "hull")
+                .attr("d", d => d.hull ? d3.line()(d.hull) : null)
+                .attr("fill", "transparent")
+                // .attr("stroke", "yellow")
+                // .attr("stroke-width", 2)
+                .on("click", function(event, d) {
+                    const clickedGraph = d.graph;
+
+                    // Disable tangential force
+                    simulation.force("tangential", null);
+
+                    // Apply a strong radial force outward to non-clicked nodes
+                    simulation.force("radialOutward", d3.forceRadial(1000, centerX, centerY)
+                        .strength(d => d.graph === clickedGraph ? 0 : 0.01));
+
+                    // Apply a strong radial force inward to clicked nodes
+                    simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
+                        .strength(d => d.graph === clickedGraph ? 0.2 : 0));
+
+                    simulation.alpha(1).restart();
+                });
         }
 
         function dragstarted(event, d) {
@@ -251,7 +269,7 @@ export const TokenTransferGraph = () => {
 
         function tangentialForce(strength, cx, cy) {
             return function() {
-                data.nodes.forEach(d => {
+                nodes.forEach(d => {
                     const dx = d.x - cx;
                     const dy = d.y - cy;
                     const distance = Math.sqrt(dx * dx + dy * dy);
@@ -282,7 +300,7 @@ export const TokenTransferGraph = () => {
         return () => {
             window.removeEventListener("resize", resize);
         };
-    }, [data]);
+    }, [graphData]);
 
     const calculatePerpendicularOffset = (d, offset) => {
         const dx = d.target.x - d.source.x;
