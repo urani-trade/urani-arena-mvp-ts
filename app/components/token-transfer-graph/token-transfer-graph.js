@@ -180,7 +180,7 @@ export const TokenTransferGraph = () => {
             .attr("x", -25)
             .attr("dy", ".35em")
             .style("fill", "green")
-            .text(d => `${d.name} (${d.graph})`); // Modified to include graph name
+            .text(d => `${d.name}`);
 
         // Initialize the hull paths
         let hullPath = g.selectAll(".hull");
@@ -230,8 +230,6 @@ export const TokenTransferGraph = () => {
                 .attr("class", "hull")
                 .attr("d", d => d.hull ? d3.line()(d.hull) : null)
                 .attr("fill", "transparent")
-                // .attr("stroke", "yellow")
-                // .attr("stroke-width", 2)
                 .on("click", function(event, d) {
                     const clickedGraph = d.graph;
 
@@ -247,6 +245,13 @@ export const TokenTransferGraph = () => {
                         .strength(d => d.graph === clickedGraph ? 0.2 : 0));
 
                     simulation.alpha(1).restart();
+
+                    // Delay the zoom to allow the graph to settle in the center
+                    setTimeout(() => {
+                        svg.transition()
+                            .duration(750)
+                            .attr("viewBox", `${centerX - viewBoxWidth / 4} ${centerY - viewBoxHeight / 4} ${viewBoxWidth / 2} ${viewBoxHeight / 2}`);
+                    }, 1000);
                 });
         }
 
@@ -287,9 +292,6 @@ export const TokenTransferGraph = () => {
             const { width, height } = container.node().getBoundingClientRect();
 
             svg.attr("width", width).attr("height", height);
-            // svg.attr("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
-            // simulation.force("center", d3.forceCenter(viewBoxWidth / 2, viewBoxHeight / 2));
-            // simulation.alpha(0.3).restart();
         }
 
         window.addEventListener("resize", resize);
