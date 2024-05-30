@@ -166,73 +166,20 @@ export const TokenTransferGraph = () => {
                 .on("drag", dragged)
                 .on("end", dragended))
             .on("click", function(event, d) {
-                // Get the direction vector for each graph
-                const graphVectors = {
-                    "SOL": { x: 1, y: 1 },
-                    "ETH": { x: -1, y: 1 },
-                    "BTC": { x: -1, y: -1 },
-                    "LTC": { x: 1, y: -1 }
-                };
-
                 const clickedGraph = d.graph;
 
                 // Disable tangential force
                 simulation.force("tangential", null);
 
-                const transitionNodes = d3.selectAll(".node")
-                    .filter(n => n.graph !== clickedGraph);
+                // Apply a strong radial force outward to non-clicked nodes
+                simulation.force("radialOutward", d3.forceRadial(1000, centerX, centerY)
+                    .strength(d => d.graph === clickedGraph ? 0 : 0.01));
 
-                const transitionLinks = d3.selectAll(".link")
-                    .filter(l => l.graph !== clickedGraph);
+                // Apply a strong radial force inward to clicked nodes
+                simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
+                    .strength(d => d.graph === clickedGraph ? 0.2 : 0));
 
-                const transitionLinkLabels = d3.selectAll(".link-label")
-                    .filter(l => l.graph !== clickedGraph);
-
-                const exitVector = graphVectors[clickedGraph];
-
-                transitionNodes.transition()
-                    .duration(3000)
-                    .attr("transform", n => {
-                        const angle = Math.atan2(n.y - centerY, n.x - centerX);
-                        const offsetX = 2000 * Math.cos(angle);
-                        const offsetY = 2000 * Math.sin(angle);
-                        return `translate(${offsetX}, ${offsetY})`;
-                    })
-                    .style("opacity", 0)
-                    .on("end", function() {
-                        d3.select(this).remove();
-                    });
-
-                transitionLinks.transition()
-                    .duration(3000)
-                    .attr("transform", l => {
-                        const angle = Math.atan2(l.target.y - l.source.y, l.target.x - l.source.x);
-                        const offsetX = 2000 * Math.cos(angle);
-                        const offsetY = 2000 * Math.sin(angle);
-                        return `translate(${offsetX}, ${offsetY})`;
-                    })
-                    .style("opacity", 0)
-                    .on("end", function() {
-                        d3.select(this).remove();
-                    });
-
-                transitionLinkLabels.transition()
-                    .duration(3000)
-                    .attr("transform", l => {
-                        const angle = Math.atan2(l.target.y - l.source.y, l.target.x - l.source.x);
-                        const offsetX = 2000 * Math.cos(angle);
-                        const offsetY = 2000 * Math.sin(angle);
-                        return `translate(${offsetX}, ${offsetY})`;
-                    })
-                    .style("opacity", 0)
-                    .on("end", function() {
-                        d3.select(this).remove();
-                    });
-
-                // Remove nodes from the simulation
-                simulation.nodes(data.nodes.filter(n => n.graph === clickedGraph));
-                simulation.force("link").links(data.links.filter(l => l.graph === clickedGraph));
-                simulation.alpha(0.3).restart();
+                simulation.alpha(1).restart();
             });
 
         // Add the wide outlined rectangles for the nodes
@@ -322,9 +269,9 @@ export const TokenTransferGraph = () => {
             const { width, height } = container.node().getBoundingClientRect();
 
             svg.attr("width", width).attr("height", height);
-            svg.attr("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
-            simulation.force("center", d3.forceCenter(viewBoxWidth / 2, viewBoxHeight / 2));
-            simulation.alpha(0.3).restart();
+            // svg.attr("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
+            // simulation.force("center", d3.forceCenter(viewBoxWidth / 2, viewBoxHeight / 2));
+            // simulation.alpha(0.3).restart();
         }
 
         window.addEventListener("resize", resize);
