@@ -42,64 +42,64 @@ const Leaderboard: React.FC = () => {
 
   return (
     <div className="mt-10 flex flex-col items-center justify-center p-2 sm:p-4 space-y-4 sm:space-y-6">
-      <h1 className="text-2xl sm:text-4xl font-bold mb-4 text-center text-white">
+      <h1 className="text-xl sm:text-2xl md:text-4xl font-bold mb-4 text-center text-white">
         {season} Leaderboard
       </h1>
       <div className="flex flex-col lg:flex-row w-full max-w-6xl space-x-0 lg:space-x-6 space-y-4 sm:space-y-6 lg:space-y-0">
-        <div className="flex-1 bg-gradient-to-br from-zinc-900 via-zinc-910 to-black shadow-2xl rounded-lg p-4 sm:p-6 border border-gray-600 dark:border-gray-700">
-          <h1 className="text-xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">
+        <div className="flex-1 bg-gradient-to-br from-zinc-900 via-zinc-910 to-black shadow-2xl rounded-lg p-2 sm:p-4 md:p-6 border border-gray-600 dark:border-gray-700">
+          <h1 className="text-lg sm:text-xl md:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">
             Top Operators
           </h1>
-          <table className="w-full text-left text-white text-sm sm:text-base">
+          <table className="w-full text-left text-white text-xs sm:text-sm md:text-base">
             <thead className="rounded-lg">
               <tr className="bg-gradient-radial from-zinc-800 to-zinc-850 rounded-lg">
-                <th className="px-2 sm:px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold">Name</th>
+                <th className="px-1 sm:px-2 md:px-4 py-1 sm:py-2 border-b-2 border-gray-800 text-sm md:text-lg font-semibold">Name</th>
                 <th
-                  className="px-2 sm:px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold cursor-pointer"
+                  className="px-1 sm:px-2 md:px-4 py-1 sm:py-2 border-b-2 border-gray-800 text-sm md:text-lg font-semibold cursor-pointer"
                   onClick={() => handleSort('batches')}
                 >
                   <div className="flex items-center">
                     Batches
-                    <span className="ml-1 w-4 h-4">
+                    <span className="ml-1 w-3 sm:w-4 h-3 sm:h-4">
                       {sortKey === 'batches' && (
                         sortOrder === 'asc' ? (
-                          <ChevronUpIcon className="w-4 h-4" />
+                          <ChevronUpIcon className="w-3 sm:w-4 h-3 sm:h-4" />
                         ) : (
-                          <ChevronDownIcon className="w-4 h-4" />
+                          <ChevronDownIcon className="w-3 sm:w-4 h-3 sm:h-4" />
                         )
                       )}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="px-2 sm:px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold cursor-pointer"
+                  className="px-1 sm:px-2 md:px-4 py-1 sm:py-2 border-b-2 border-gray-800 text-sm md:text-lg font-semibold cursor-pointer"
                   onClick={() => handleSort('volume')}
                 >
                   <div className="flex items-center">
                     Volume
-                    <span className="ml-1 w-4 h-4">
+                    <span className="ml-1 w-3 sm:w-4 h-3 sm:h-4">
                       {sortKey === 'volume' && (
                         sortOrder === 'asc' ? (
-                          <ChevronUpIcon className="w-4 h-4" />
+                          <ChevronUpIcon className="w-3 sm:w-4 h-3 sm:h-4" />
                         ) : (
-                          <ChevronDownIcon className="w-4 h-4" />
+                          <ChevronDownIcon className="w-3 sm:w-4 h-3 sm:h-4" />
                         )
                       )}
                     </span>
                   </div>
                 </th>
                 <th
-                  className="px-2 sm:px-4 py-2 border-b-2 border-gray-800 text-lg font-semibold cursor-pointer"
+                  className="px-1 sm:px-2 md:px-4 py-1 sm:py-2 border-b-2 border-gray-800 text-sm md:text-lg font-semibold cursor-pointer"
                   onClick={() => handleSort('surplus')}
                 >
                   <div className="flex items-center">
                     Surplus
-                    <span className="ml-1 w-4 h-4">
+                    <span className="ml-1 w-3 sm:w-4 h-3 sm:h-4">
                       {sortKey === 'surplus' && (
                         sortOrder === 'asc' ? (
-                          <ChevronUpIcon className="w-4 h-4" />
+                          <ChevronUpIcon className="w-3 sm:w-4 h-3 sm:h-4" />
                         ) : (
-                          <ChevronDownIcon className="w-4 h-4" />
+                          <ChevronDownIcon className="w-3 sm:w-4 h-3 sm:h-4" />
                         )
                       )}
                     </span>
@@ -117,16 +117,16 @@ const Leaderboard: React.FC = () => {
                     index === sortedData.length - 1 ? 'last:rounded-bl-lg last:rounded-br-lg' : ''
                   }`}
                 >
-                  <td className={`px-2 sm:px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                  <td className={`px-1 sm:px-2 md:px-4 py-1 sm:py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
                     {player.name}
                   </td>
-                  <td className={`px-2 sm:px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                  <td className={`px-1 sm:px-2 md:px-4 py-1 sm:py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
                     {player.batches}
                   </td>
-                  <td className={`px-2 sm:px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                  <td className={`px-1 sm:px-2 md:px-4 py-1 sm:py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
                     ${player.volume.toLocaleString()}
                   </td>
-                  <td className={`px-2 sm:px-4 py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
+                  <td className={`px-1 sm:px-2 md:px-4 py-1 sm:py-2 ${index !== sortedData.length - 1 ? 'border-b border-gray-800' : ''}`}>
                     ${player.surplus.toLocaleString()}
                   </td>
                 </tr>
@@ -134,24 +134,24 @@ const Leaderboard: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <div className="w-full lg:w-1/3 bg-gradient-to-br from-zinc-900 via-zinc-910 to-black shadow-2xl rounded-lg p-4 sm:p-6 border border-gray-600 dark:border-gray-700">
-          <h1 className="text-xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">
+        <div className="w-full lg:w-1/3 bg-gradient-to-br from-zinc-900 via-zinc-910 to-black shadow-2xl rounded-lg p-2 sm:p-4 md:p-6 border border-gray-600 dark:border-gray-700">
+          <h1 className="text-lg sm:text-xl md:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">
             Highlights
           </h1>
-          <div className="text-white space-y-4 sm:space-y-4">
-            <div className="flex items-center space-x-2">
-              <TrophyIcon className="w-4 sm:w-6 h-4 sm:h-6 text-yellow-400" />
-              <span className="text-sm sm:text-base">Winner of Most Batches Filled: <strong>Alice</strong></span>
+          <div className="text-white space-y-2 sm:space-y-4">
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <TrophyIcon className="w-3 sm:w-4 md:w-6 h-3 sm:h-4 md:h-6 text-yellow-400" />
+              <span className="text-xs sm:text-sm md:text-base">Winner of Most Batches Filled: <strong>Alice</strong></span>
             </div>
             <hr className="border-gray-700" />
-            <div className="flex items-center space-x-2">
-              <TrophyIcon className="w-4 sm:w-6 h-4 sm:h-6 text-yellow-400" />
-              <span className="text-sm sm:text-base">Winner of Most Volume Filled: <strong>Bob</strong></span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <TrophyIcon className="w-3 sm:w-4 md:w-6 h-3 sm:h-4 md:h-6 text-yellow-400" />
+              <span className="text-xs sm:text-sm md:text-base">Winner of Most Volume Filled: <strong>Bob</strong></span>
             </div>
             <hr className="border-gray-700" />
-            <div className="flex items-center space-x-2">
-              <TrophyIcon className="w-4 sm:w-6 h-4 sm:h-6 text-yellow-400" />
-              <span className="text-sm sm:text-base">Winner of Most Surplus Given: <strong>Charlie</strong></span>
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              <TrophyIcon className="w-3 sm:w-4 md:w-6 h-3 sm:h-4 md:h-6 text-yellow-400" />
+              <span className="text-xs sm:text-sm md:text-base">Winner of Most Surplus Given: <strong>Charlie</strong></span>
             </div>
           </div>
         </div>
