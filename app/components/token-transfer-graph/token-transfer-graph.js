@@ -25,8 +25,8 @@ export const TokenTransferGraph = () => {
         const { width, height } = container.node().getBoundingClientRect();
 
         // Define the width and height for the SVG's viewBox
-        const viewBoxWidth = width * 1.3;  // Make the SVG twice as wide as the container
-        const viewBoxHeight = height * 1.3; // Make the SVG 1.5 times as tall as the container
+        const viewBoxWidth = 1000;  
+        const viewBoxHeight = 1000;
 
         // Compute the distinct nodes from the links
         var nodes = {};
@@ -244,6 +244,6 @@ export const TokenTransferGraph = () => {
     }
 
     return (
-        <div ref={graphRef} style={{ width: '100%', height: '80vh' }}></div>
+        <div ref={graphRef} style={{ width: '100%', height: '700px' }}></div>
     );
 };
