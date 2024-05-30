@@ -134,24 +134,24 @@ const Leaderboard: React.FC = () => {
             </tbody>
           </table>
         </div>
-        <div className="w-full lg:w-1/3 bg-gradient-to-br from-zinc-900 via-zinc-910 to-black shadow-2xl rounded-lg p-2 sm:p-4 md:p-6 border border-gray-600 dark:border-gray-700">
-          <h1 className="text-lg sm:text-xl md:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">
+        <div className="w-full lg:w-1/3 bg-gradient-to-br from-zinc-900 via-zinc-910 to-black shadow-2xl rounded-lg p-2 sm:p-4 md:p-6 border border-gray-600 dark:border-gray-700 mx-auto">
+          <h1 className="text-lg lg:mb-10 sm:text-xl md:text-3xl font-bold mb-4 sm:mb-6 text-center text-white">
             Highlights
           </h1>
-          <div className="text-white space-y-2 sm:space-y-4">
+          <div className="flex flex-col items-center lg:items-start text-white space-y-2 sm:space-y-4 mx-auto">
             <div className="flex items-center space-x-1 sm:space-x-2">
               <TrophyIcon className="w-3 sm:w-4 md:w-6 h-3 sm:h-4 md:h-6 text-yellow-400" />
-              <span className="text-xs sm:text-sm md:text-base">Winner of Most Batches Filled: <strong>Alice</strong></span>
+              <span className="text-xs sm:text-sm md:text-base">Most Batches: <strong>Alice</strong></span>
             </div>
-            <hr className="border-gray-700" />
+            <hr className="border-gray-700 w-full" />
             <div className="flex items-center space-x-1 sm:space-x-2">
               <TrophyIcon className="w-3 sm:w-4 md:w-6 h-3 sm:h-4 md:h-6 text-yellow-400" />
-              <span className="text-xs sm:text-sm md:text-base">Winner of Most Volume Filled: <strong>Bob</strong></span>
+              <span className="text-xs sm:text-sm md:text-base">Most Volume: <strong>Bob</strong></span>
             </div>
-            <hr className="border-gray-700" />
+            <hr className="border-gray-700 w-full" />
             <div className="flex items-center space-x-1 sm:space-x-2">
               <TrophyIcon className="w-3 sm:w-4 md:w-6 h-3 sm:h-4 md:h-6 text-yellow-400" />
-              <span className="text-xs sm:text-sm md:text-base">Winner of Most Surplus Given: <strong>Charlie</strong></span>
+              <span className="text-xs sm:text-sm md:text-base">Most Surplus: <strong>Charlie</strong></span>
             </div>
           </div>
         </div>
