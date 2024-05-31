@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
+import axios from 'axios';
 import './token-transfer-graph.css';
 
 export const TokenTransferGraph = () => {
@@ -9,64 +10,73 @@ export const TokenTransferGraph = () => {
     const graphRef = useRef(null);
 
     useEffect(() => {
-        // Hardcoded data equivalent to the given data.csv, with graph name as part of each dictionary
-        const data = [
-            {
-                name: "SOL",
-                nodes: ["Harry", "Mario", "Sarah", "Alice", "Eveie", "Peter", "James", "Roger"],
-                links: [
-                    { source: "Harry", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "Alice", value: "SOL" },
-                    { source: "Eveie", destination: "Alice", value: "SOL" },
-                    { source: "Peter", destination: "Alice", value: "SOL" },
-                    { source: "Mario", destination: "Alice", value: "SOL" },
-                    { source: "James", destination: "Alice", value: "SOL" },
-                    { source: "Alice", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "James", value: "SOL" },
-                    { source: "Roger", destination: "James", value: "SOL" },
-                    { source: "James", destination: "Roger", value: "SOL" },
-                    { source: "Alice", destination: "Peter", value: "SOL" },
-                    { source: "Alice", destination: "Eveie", value: "SOL" },
-                    { source: "Harry", destination: "Eveie", value: "SOL" },
-                    { source: "Eveie", destination: "Harry", value: "SOL" },
-                    { source: "James", destination: "Sarah", value: "SOL" },
-                    { source: "Alice", destination: "Sarah", value: "SOL" }
-                ]
-            },
-            {
-                name: "ETH",
-                nodes: ["0xRekt", "0xBeef", "0xDead"],
-                links: [
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" },
-                    { source: "0xBeef", destination: "0xRekt", value: "ETH" },
-                    { source: "0xBeef", destination: "0xDead", value: "ETH" },
-                    { source: "0xDead", destination: "0xRekt", value: "ETH" },
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" }
-                ]
-            },
-            {
-                name: "BTC",
-                nodes: ["Jake", "Bob", "Charlie", "Dave"],
-                links: [
-                    { source: "Jake", destination: "Bob", value: "BTC" },
-                    { source: "Bob", destination: "Charlie", value: "BTC" },
-                    { source: "Charlie", destination: "Dave", value: "BTC" },
-                    { source: "Dave", destination: "Jake", value: "BTC" }
-                ]
-            },
-            {
-                name: "LTC",
-                nodes: ["X", "Y", "Z"],
-                links: [
-                    { source: "X", destination: "Y", value: "LTC" },
-                    { source: "Y", destination: "Z", value: "LTC" },
-                    { source: "Z", destination: "X", value: "LTC" },
-                    { source: "X", destination: "Z", value: "LTC" }
-                ]
-            }
-        ];
+        const transactionId = "5qfmJjXeSK7quxtXMKimGzPZnQywt3txipTsQh9CuNMEZXafafLsgeNM95MtQHJ7yGxawNYPYVCpvWpJp1c9H74X";
 
-        setGraphData(data);
+        const fetchTransactionData = async () => {
+            try {
+                const response = await axios.get(`/api/solscan?transactionId=${transactionId}`);
+                const data = response.data;
+                const tokenTransfers = [];
+
+                data.innerInstructions.forEach(instructionSet => {
+                    instructionSet.parsedInstructions.forEach(instruction => {
+                        let source, destination, amount, symbol;
+
+                        switch (instruction.type) {
+                            case 'transfer':
+                            case 'spl-transfer':
+                            case 'spl-transfer-checked':
+                                source = instruction.extra?.sourceOwner || instruction.params.authority || instruction.params.source;
+                                destination = instruction.extra?.destinationOwner || instruction.params.destination;
+                                amount = instruction.params.amount;
+                                symbol = instruction.extra ? instruction.extra.symbol : '';
+                                break;
+                            case 'sol-transfer':
+                                source = instruction.params.source;
+                                destination = instruction.params.destination;
+                                amount = instruction.params.amount;
+                                symbol = 'SOL';
+                                break;
+                            default:
+                                return; // Skip other types
+                        }
+
+                        if (source && destination && amount && symbol) {
+                            tokenTransfers.push({
+                                source,
+                                destination,
+                                value: `${amount} ${symbol}`,
+                                symbol,
+                                amount,
+                                tokenAddress: instruction.params.mint,
+                            });
+                        }
+                    });
+                });
+
+                // Filter unique nodes and links
+                const uniqueNodes = new Set();
+                const uniqueLinks = [];
+
+                tokenTransfers.forEach(transfer => {
+                    uniqueNodes.add(transfer.source);
+                    uniqueNodes.add(transfer.destination);
+                    uniqueLinks.push(transfer);
+                });
+
+                const nodes = Array.from(uniqueNodes);
+
+                setGraphData([{
+                    name: `transaction ${data.txHash}`,
+                    nodes,
+                    links: uniqueLinks,
+                }]);
+            } catch (error) {
+                console.error('Error fetching transaction data:', error);
+            }
+        };
+
+        fetchTransactionData();
     }, []);
 
     useEffect(() => {
@@ -104,7 +114,7 @@ export const TokenTransferGraph = () => {
         const simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links).id(d => d.name).distance(160))
             .force("charge", d3.forceManyBody().strength(-2000))
-            .force("center", d3.forceCenter(centerX, centerY))
+            // .force("center", d3.forceCenter(centerX, centerY))
             .force("gravity", d3.forceRadial(0.5, centerX, centerY))
             .force("tangential", tangentialForce(2, centerX, centerY))
             .alphaDecay(0)
@@ -237,7 +247,7 @@ export const TokenTransferGraph = () => {
                     simulation.force("tangential", null);
 
                     // Apply a strong radial force outward to non-clicked nodes
-                    simulation.force("radialOutward", d3.forceRadial(1000, centerX, centerY)
+                    simulation.force("radialOutward", d3.forceRadial(1500, centerX, centerY)
                         .strength(d => d.graph === clickedGraph ? 0 : 0.01));
 
                     // Apply a strong radial force inward to clicked nodes
@@ -251,7 +261,7 @@ export const TokenTransferGraph = () => {
                         svg.transition()
                             .duration(750)
                             .attr("viewBox", `${centerX - viewBoxWidth / 4} ${centerY - viewBoxHeight / 4} ${viewBoxWidth / 2} ${viewBoxHeight / 2}`);
-                    }, 1000);
+                    }, 300);
                 });
         }
 
@@ -287,18 +297,17 @@ export const TokenTransferGraph = () => {
             };
         }
 
+        for (let i = 0; i < 600; ++i) simulation.tick();
+
+        // Resize the SVG when the window is resized
         function resize() {
             const container = d3.select(graphRef.current);
             const { width, height } = container.node().getBoundingClientRect();
 
             svg.attr("width", width).attr("height", height);
         }
-
         window.addEventListener("resize", resize);
         resize();
-
-        for (let i = 0; i < 600; ++i) simulation.tick();
-
         return () => {
             window.removeEventListener("resize", resize);
         };
