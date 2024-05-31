@@ -114,9 +114,9 @@ export const TokenTransferGraph = () => {
         const simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links).id(d => d.name).distance(160))
             .force("charge", d3.forceManyBody().strength(-2000))
-            // .force("center", d3.forceCenter(centerX, centerY))
-            .force("gravity", d3.forceRadial(0.5, centerX, centerY))
-            .force("tangential", tangentialForce(2, centerX, centerY))
+            .force("center", d3.forceCenter(centerX, centerY))
+            // .force("gravity", d3.forceRadial(0.5, centerX, centerY))
+            // .force("tangential", tangentialForce(2, centerX, centerY))
             .alphaDecay(0)
             .on("tick", tick);
 
@@ -164,6 +164,7 @@ export const TokenTransferGraph = () => {
             .attr("class", "link-label")
             .attr("dy", ".35em")
             .style("fill", "green")
+            .style("text-anchor", "middle")
             .text(d => d.value);
 
         // Define the nodes
@@ -190,7 +191,7 @@ export const TokenTransferGraph = () => {
             .attr("x", -25)
             .attr("dy", ".35em")
             .style("fill", "green")
-            .text(d => `${d.name}`);
+            .text(d => `${d.name.substring(0, 6)}...`);
 
         // Initialize the hull paths
         let hullPath = g.selectAll(".hull");
@@ -214,18 +215,20 @@ export const TokenTransferGraph = () => {
 
             linkLabels
                 .attr("x", d => {
-                    const offset = 10;
+                    const offset = 20;
                     const delta = calculatePerpendicularOffset(d, offset);
-                    if (delta.dx < 0) {
-                        const newOffset = 25;
-                        return (d.source.x + d.target.x) / 2 + calculatePerpendicularOffset(d, newOffset).dx;
-                    }
                     return (d.source.x + d.target.x) / 2 + delta.dx;
                 })
                 .attr("y", d => {
-                    const offset = 10;
+                    const offset = 20;
                     const delta = calculatePerpendicularOffset(d, offset);
                     return (d.source.y + d.target.y) / 2 + delta.dy;
+                })
+                .attr("transform", d => {
+                    const angle = Math.atan2(d.target.y - d.source.y, d.target.x - d.source.x) * 180 / Math.PI;
+                    const x = (d.source.x + d.target.x) / 2 + calculatePerpendicularOffset(d, 10).dx;
+                    const y = (d.source.y + d.target.y) / 2 + calculatePerpendicularOffset(d, 10).dy;
+                    return `rotate(${(angle > 90 || angle < -90) ? angle + 180 : angle},${x},${y})`;
                 });
 
             // Update hulls
@@ -250,9 +253,9 @@ export const TokenTransferGraph = () => {
                     simulation.force("radialOutward", d3.forceRadial(1500, centerX, centerY)
                         .strength(d => d.graph === clickedGraph ? 0 : 0.01));
 
-                    // Apply a strong radial force inward to clicked nodes
-                    simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
-                        .strength(d => d.graph === clickedGraph ? 0.2 : 0));
+                    // // Apply a strong radial force inward to clicked nodes
+                    // simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
+                    //     .strength(d => d.graph === clickedGraph ? 0.2 : 0));
 
                     simulation.alpha(1).restart();
 
