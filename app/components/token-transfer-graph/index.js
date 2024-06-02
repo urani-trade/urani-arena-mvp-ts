@@ -111,6 +111,7 @@ export const TokenTransferGraph = () => {
         const container = d3.select(graphRef.current);
         container.select("svg").remove(); // Remove any existing SVG to avoid duplicates
         const { width, height } = container.node().getBoundingClientRect();
+        console.log(container.node())
 
         // Define the width and height for the SVG's viewBox
         const viewBoxWidth = 1000;
@@ -337,6 +338,6 @@ export const TokenTransferGraph = () => {
     }
 
     return (
-        <div ref={graphRef} style={{ width: '100%', height: '700px' }}></div>
+        <div ref={graphRef} className="w-full h-[400px] md:h-[700px]"></div>
     );
 };
