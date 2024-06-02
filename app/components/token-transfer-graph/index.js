@@ -3,8 +3,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
-import { addressMapping } from './addressMapping';
-import './token-transfer-graph.css';
+import { addressMapping } from './address-mapping';
+import './index.css';
 
 export const TokenTransferGraph = () => {
     const [graphData, setGraphData] = useState(null);
