@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import axios from 'axios';
+import { addressMapping } from './addressMapping';
 import './token-transfer-graph.css';
 
 export const TokenTransferGraph = () => {
@@ -20,7 +21,7 @@ export const TokenTransferGraph = () => {
 
                 data.innerInstructions.forEach(instructionSet => {
                     instructionSet.parsedInstructions.forEach(instruction => {
-                        let source, destination, amount, symbol;
+                        let source, destination, amount, symbol, decimals;
 
                         switch (instruction.type) {
                             case 'transfer':
@@ -30,24 +31,31 @@ export const TokenTransferGraph = () => {
                                 destination = instruction.extra?.destinationOwner || instruction.params.destination;
                                 amount = instruction.params.amount;
                                 symbol = instruction.extra ? instruction.extra.symbol : '';
+                                decimals = instruction.extra ? instruction.extra.decimals : 0;
                                 break;
                             case 'sol-transfer':
                                 source = instruction.params.source;
                                 destination = instruction.params.destination;
                                 amount = instruction.params.amount;
                                 symbol = 'SOL';
+                                decimals = 9; // SOL has 9 decimals
                                 break;
                             default:
                                 return; // Skip other types
                         }
 
-                        if (source && destination && amount && symbol) {
+                        if (source && destination && parseInt(amount) && symbol) {
+                            // Use the addressMapping to resolve names
+                            const resolvedSource = addressMapping[source] ? addressMapping[source].title : source;
+                            const resolvedDestination = addressMapping[destination] ? addressMapping[destination].title : destination;
+                            const resolvedAmount = parseInt(amount) / Math.pow(10, decimals); // Convert amount to proper decimal value
+
                             tokenTransfers.push({
-                                source,
-                                destination,
-                                value: `${amount} ${symbol}`,
+                                source: resolvedSource,
+                                destination: resolvedDestination,
+                                value: `${resolvedAmount.toFixed(decimals)} ${symbol}`,
                                 symbol,
-                                amount,
+                                amount: resolvedAmount,
                                 tokenAddress: instruction.params.mint,
                             });
                         }
