@@ -112,7 +112,7 @@ const OrderBatch = () => {
                   key={venueIndex} 
                   src={venue.venueImage} 
                   alt={venue.venueName} 
-                  className="w-8 h-8 rounded-full absolute" 
+                  className="w-6 h-6 rounded-full absolute" 
                   style={{ left: `${venueIndex * 20}px` }} 
                 />
               ))}
