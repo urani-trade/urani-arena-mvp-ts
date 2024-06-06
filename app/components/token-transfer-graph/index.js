@@ -2,71 +2,89 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
-import './token-transfer-graph.css';
+import axios from 'axios';
+import { addressMapping } from './address-mapping';
+import './index.css';
 
 export const TokenTransferGraph = () => {
     const [graphData, setGraphData] = useState(null);
     const graphRef = useRef(null);
 
     useEffect(() => {
-        // Hardcoded data equivalent to the given data.csv, with graph name as part of each dictionary
-        const data = [
-            {
-                name: "SOL",
-                nodes: ["Harry", "Mario", "Sarah", "Alice", "Eveie", "Peter", "James", "Roger"],
-                links: [
-                    { source: "Harry", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "Alice", value: "SOL" },
-                    { source: "Eveie", destination: "Alice", value: "SOL" },
-                    { source: "Peter", destination: "Alice", value: "SOL" },
-                    { source: "Mario", destination: "Alice", value: "SOL" },
-                    { source: "James", destination: "Alice", value: "SOL" },
-                    { source: "Alice", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "James", value: "SOL" },
-                    { source: "Roger", destination: "James", value: "SOL" },
-                    { source: "James", destination: "Roger", value: "SOL" },
-                    { source: "Alice", destination: "Peter", value: "SOL" },
-                    { source: "Alice", destination: "Eveie", value: "SOL" },
-                    { source: "Harry", destination: "Eveie", value: "SOL" },
-                    { source: "Eveie", destination: "Harry", value: "SOL" },
-                    { source: "James", destination: "Sarah", value: "SOL" },
-                    { source: "Alice", destination: "Sarah", value: "SOL" }
-                ]
-            },
-            {
-                name: "ETH",
-                nodes: ["0xRekt", "0xBeef", "0xDead"],
-                links: [
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" },
-                    { source: "0xBeef", destination: "0xRekt", value: "ETH" },
-                    { source: "0xBeef", destination: "0xDead", value: "ETH" },
-                    { source: "0xDead", destination: "0xRekt", value: "ETH" },
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" }
-                ]
-            },
-            {
-                name: "BTC",
-                nodes: ["Jake", "Bob", "Charlie", "Dave"],
-                links: [
-                    { source: "Jake", destination: "Bob", value: "BTC" },
-                    { source: "Bob", destination: "Charlie", value: "BTC" },
-                    { source: "Charlie", destination: "Dave", value: "BTC" },
-                    { source: "Dave", destination: "Jake", value: "BTC" }
-                ]
-            },
-            {
-                name: "LTC",
-                nodes: ["X", "Y", "Z"],
-                links: [
-                    { source: "X", destination: "Y", value: "LTC" },
-                    { source: "Y", destination: "Z", value: "LTC" },
-                    { source: "Z", destination: "X", value: "LTC" },
-                    { source: "X", destination: "Z", value: "LTC" }
-                ]
-            }
-        ];
+        const transactionId = "2jMfRuwbvSUVXAr8m9BiG2sgL1gyEfQndMABSS9sfy5zEjZwMC1SNCWSSBGNUrW9cwJ9mEcx1YAt9ixvitSBE6Wt";
 
-        setGraphData(data);
+        const fetchTransactionData = async () => {
+            try {
+                const response = await axios.get(`/api/solscan?transactionId=${transactionId}`);
+                const data = response.data;
+                const tokenTransfers = [];
+
+                data.innerInstructions.forEach(instructionSet => {
+                    instructionSet.parsedInstructions.forEach(instruction => {
+                        let source, destination, amount, symbol, decimals;
+
+                        switch (instruction.type) {
+                            case 'transfer':
+                            case 'spl-transfer':
+                            case 'spl-transfer-checked':
+                                source = instruction.extra?.sourceOwner || instruction.params.authority || instruction.params.source;
+                                destination = instruction.extra?.destinationOwner || instruction.params.destination;
+                                amount = instruction.params.amount;
+                                symbol = instruction.extra ? instruction.extra.symbol : '';
+                                decimals = instruction.extra ? instruction.extra.decimals : 0;
+                                break;
+                            case 'sol-transfer':
+                                source = instruction.params.source;
+                                destination = instruction.params.destination;
+                                amount = instruction.params.amount;
+                                symbol = 'SOL';
+                                decimals = 9; // SOL has 9 decimals
+                                break;
+                            default:
+                                return; // Skip other types
+                        }
+
+                        if (source && destination && parseInt(amount) && symbol) {
+                            // Use the addressMapping to resolve names
+                            const resolvedSource = addressMapping[source] ? addressMapping[source].title : source;
+                            const resolvedDestination = addressMapping[destination] ? addressMapping[destination].title : destination;
+                            const resolvedAmount = parseInt(amount) / Math.pow(10, decimals); // Convert amount to proper decimal value
+
+                            tokenTransfers.push({
+                                source: resolvedSource,
+                                destination: resolvedDestination,
+                                value: `${resolvedAmount.toFixed(decimals)} ${symbol}`,
+                                symbol,
+                                amount: resolvedAmount,
+                                tokenAddress: instruction.params.mint,
+                            });
+                        }
+                    });
+                });
+
+                // Filter unique nodes and links
+                const uniqueNodes = new Set();
+                const uniqueLinks = [];
+
+                tokenTransfers.forEach(transfer => {
+                    uniqueNodes.add(transfer.source);
+                    uniqueNodes.add(transfer.destination);
+                    uniqueLinks.push(transfer);
+                });
+
+                const nodes = Array.from(uniqueNodes);
+
+                setGraphData([{
+                    name: `transaction ${data.txHash}`,
+                    nodes,
+                    links: uniqueLinks,
+                }]);
+            } catch (error) {
+                console.error('Error fetching transaction data:', error);
+            }
+        };
+
+        fetchTransactionData();
     }, []);
 
     useEffect(() => {
@@ -93,6 +111,7 @@ export const TokenTransferGraph = () => {
         const container = d3.select(graphRef.current);
         container.select("svg").remove(); // Remove any existing SVG to avoid duplicates
         const { width, height } = container.node().getBoundingClientRect();
+        console.log(container.node())
 
         // Define the width and height for the SVG's viewBox
         const viewBoxWidth = 1000;
@@ -105,8 +124,8 @@ export const TokenTransferGraph = () => {
             .force("link", d3.forceLink(links).id(d => d.name).distance(160))
             .force("charge", d3.forceManyBody().strength(-2000))
             .force("center", d3.forceCenter(centerX, centerY))
-            .force("gravity", d3.forceRadial(0.5, centerX, centerY))
-            .force("tangential", tangentialForce(2, centerX, centerY))
+            // .force("gravity", d3.forceRadial(0.5, centerX, centerY))
+            // .force("tangential", tangentialForce(2, centerX, centerY))
             .alphaDecay(0)
             .on("tick", tick);
 
@@ -154,6 +173,7 @@ export const TokenTransferGraph = () => {
             .attr("class", "link-label")
             .attr("dy", ".35em")
             .style("fill", "green")
+            .style("text-anchor", "middle")
             .text(d => d.value);
 
         // Define the nodes
@@ -180,7 +200,7 @@ export const TokenTransferGraph = () => {
             .attr("x", -25)
             .attr("dy", ".35em")
             .style("fill", "green")
-            .text(d => `${d.name}`);
+            .text(d => `${d.name.substring(0, 6)}...`);
 
         // Initialize the hull paths
         let hullPath = g.selectAll(".hull");
@@ -204,18 +224,20 @@ export const TokenTransferGraph = () => {
 
             linkLabels
                 .attr("x", d => {
-                    const offset = 10;
+                    const offset = 20;
                     const delta = calculatePerpendicularOffset(d, offset);
-                    if (delta.dx < 0) {
-                        const newOffset = 25;
-                        return (d.source.x + d.target.x) / 2 + calculatePerpendicularOffset(d, newOffset).dx;
-                    }
                     return (d.source.x + d.target.x) / 2 + delta.dx;
                 })
                 .attr("y", d => {
-                    const offset = 10;
+                    const offset = 20;
                     const delta = calculatePerpendicularOffset(d, offset);
                     return (d.source.y + d.target.y) / 2 + delta.dy;
+                })
+                .attr("transform", d => {
+                    const angle = Math.atan2(d.target.y - d.source.y, d.target.x - d.source.x) * 180 / Math.PI;
+                    const x = (d.source.x + d.target.x) / 2 + calculatePerpendicularOffset(d, 10).dx;
+                    const y = (d.source.y + d.target.y) / 2 + calculatePerpendicularOffset(d, 10).dy;
+                    return `rotate(${(angle > 90 || angle < -90) ? angle + 180 : angle},${x},${y})`;
                 });
 
             // Update hulls
@@ -237,12 +259,12 @@ export const TokenTransferGraph = () => {
                     simulation.force("tangential", null);
 
                     // Apply a strong radial force outward to non-clicked nodes
-                    simulation.force("radialOutward", d3.forceRadial(1000, centerX, centerY)
+                    simulation.force("radialOutward", d3.forceRadial(1500, centerX, centerY)
                         .strength(d => d.graph === clickedGraph ? 0 : 0.01));
 
-                    // Apply a strong radial force inward to clicked nodes
-                    simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
-                        .strength(d => d.graph === clickedGraph ? 0.2 : 0));
+                    // // Apply a strong radial force inward to clicked nodes
+                    // simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
+                    //     .strength(d => d.graph === clickedGraph ? 0.2 : 0));
 
                     simulation.alpha(1).restart();
 
@@ -251,7 +273,7 @@ export const TokenTransferGraph = () => {
                         svg.transition()
                             .duration(750)
                             .attr("viewBox", `${centerX - viewBoxWidth / 4} ${centerY - viewBoxHeight / 4} ${viewBoxWidth / 2} ${viewBoxHeight / 2}`);
-                    }, 1000);
+                    }, 300);
                 });
         }
 
@@ -287,18 +309,17 @@ export const TokenTransferGraph = () => {
             };
         }
 
+        for (let i = 0; i < 600; ++i) simulation.tick();
+
+        // Resize the SVG when the window is resized
         function resize() {
             const container = d3.select(graphRef.current);
             const { width, height } = container.node().getBoundingClientRect();
 
             svg.attr("width", width).attr("height", height);
         }
-
         window.addEventListener("resize", resize);
         resize();
-
-        for (let i = 0; i < 600; ++i) simulation.tick();
-
         return () => {
             window.removeEventListener("resize", resize);
         };
@@ -317,6 +338,6 @@ export const TokenTransferGraph = () => {
     }
 
     return (
-        <div ref={graphRef} style={{ width: '100%', height: '700px' }}></div>
+        <div ref={graphRef} className="w-full h-[400px] md:h-[700px]"></div>
     );
 };
