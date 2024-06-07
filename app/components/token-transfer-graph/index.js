@@ -6,84 +6,90 @@ import axios from 'axios';
 import { addressMapping } from './address-mapping';
 import './index.css';
 
+const transactionId = "2jMfRuwbvSUVXAr8m9BiG2sgL1gyEfQndMABSS9sfy5zEjZwMC1SNCWSSBGNUrW9cwJ9mEcx1YAt9ixvitSBE6Wt";
+
 export const TokenTransferGraph = () => {
     const [graphData, setGraphData] = useState(null);
     const graphRef = useRef(null);
 
+    const fetchTransactionData = async () => {
+        try {
+            const response = await axios.get(`https://pro-api.solscan.io/v1.0/transaction/${transactionId}`,
+                {
+                    headers: {
+                        'accept': '*/*',
+                        'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVhdGVkQXQiOjE3MTcxNTgxMzU4MDgsImVtYWlsIjoiZ3JpZmYuaG93bEBnbWFpbC5jb20iLCJhY3Rpb24iOiJ0b2tlbi1hcGkiLCJpYXQiOjE3MTcxNTgxMzV9.jeI5psnDpF_HyLXRZyAA9MS1ULAHoIndd3myiLNroyg'
+                    }
+            });
+            const data = response.data;
+            const tokenTransfers = [];
+
+            data.innerInstructions.forEach(instructionSet => {
+                instructionSet.parsedInstructions.forEach(instruction => {
+                    let source, destination, amount, symbol, decimals;
+
+                    switch (instruction.type) {
+                        case 'transfer':
+                        case 'spl-transfer':
+                        case 'spl-transfer-checked':
+                            source = instruction.extra?.sourceOwner || instruction.params.authority || instruction.params.source;
+                            destination = instruction.extra?.destinationOwner || instruction.params.destination;
+                            amount = instruction.params.amount;
+                            symbol = instruction.extra ? instruction.extra.symbol : '';
+                            decimals = instruction.extra ? instruction.extra.decimals : 0;
+                            break;
+                        case 'sol-transfer':
+                            source = instruction.params.source;
+                            destination = instruction.params.destination;
+                            amount = instruction.params.amount;
+                            symbol = 'SOL';
+                            decimals = 9; // SOL has 9 decimals
+                            break;
+                        default:
+                            return; // Skip other types
+                    }
+
+                    if (source && destination && parseInt(amount) && symbol) {
+                        // Use the addressMapping to resolve names
+                        const resolvedSource = addressMapping[source] ? addressMapping[source].title : source;
+                        const resolvedDestination = addressMapping[destination] ? addressMapping[destination].title : destination;
+                        const resolvedAmount = parseInt(amount) / Math.pow(10, decimals); // Convert amount to proper decimal value
+
+                        tokenTransfers.push({
+                            source: resolvedSource,
+                            destination: resolvedDestination,
+                            value: `${resolvedAmount.toFixed(decimals)} ${symbol}`,
+                            symbol,
+                            amount: resolvedAmount,
+                            tokenAddress: instruction.params.mint,
+                        });
+                    }
+                });
+            });
+
+            // Filter unique nodes and links
+            const uniqueNodes = new Set();
+            const uniqueLinks = [];
+
+            tokenTransfers.forEach(transfer => {
+                uniqueNodes.add(transfer.source);
+                uniqueNodes.add(transfer.destination);
+                uniqueLinks.push(transfer);
+            });
+
+            const nodes = Array.from(uniqueNodes);
+
+            setGraphData([{
+                name: `transaction ${data.txHash}`,
+                nodes,
+                links: uniqueLinks,
+            }]);
+        } catch (error) {
+            console.error('Error fetching transaction data:', error);
+        }
+    };
+
     useEffect(() => {
-        const transactionId = "2jMfRuwbvSUVXAr8m9BiG2sgL1gyEfQndMABSS9sfy5zEjZwMC1SNCWSSBGNUrW9cwJ9mEcx1YAt9ixvitSBE6Wt";
-
-        const fetchTransactionData = async () => {
-            try {
-                const response = await axios.get(`/api/solscan?transactionId=${transactionId}`);
-                const data = response.data;
-                const tokenTransfers = [];
-
-                data.innerInstructions.forEach(instructionSet => {
-                    instructionSet.parsedInstructions.forEach(instruction => {
-                        let source, destination, amount, symbol, decimals;
-
-                        switch (instruction.type) {
-                            case 'transfer':
-                            case 'spl-transfer':
-                            case 'spl-transfer-checked':
-                                source = instruction.extra?.sourceOwner || instruction.params.authority || instruction.params.source;
-                                destination = instruction.extra?.destinationOwner || instruction.params.destination;
-                                amount = instruction.params.amount;
-                                symbol = instruction.extra ? instruction.extra.symbol : '';
-                                decimals = instruction.extra ? instruction.extra.decimals : 0;
-                                break;
-                            case 'sol-transfer':
-                                source = instruction.params.source;
-                                destination = instruction.params.destination;
-                                amount = instruction.params.amount;
-                                symbol = 'SOL';
-                                decimals = 9; // SOL has 9 decimals
-                                break;
-                            default:
-                                return; // Skip other types
-                        }
-
-                        if (source && destination && parseInt(amount) && symbol) {
-                            // Use the addressMapping to resolve names
-                            const resolvedSource = addressMapping[source] ? addressMapping[source].title : source;
-                            const resolvedDestination = addressMapping[destination] ? addressMapping[destination].title : destination;
-                            const resolvedAmount = parseInt(amount) / Math.pow(10, decimals); // Convert amount to proper decimal value
-
-                            tokenTransfers.push({
-                                source: resolvedSource,
-                                destination: resolvedDestination,
-                                value: `${resolvedAmount.toFixed(decimals)} ${symbol}`,
-                                symbol,
-                                amount: resolvedAmount,
-                                tokenAddress: instruction.params.mint,
-                            });
-                        }
-                    });
-                });
-
-                // Filter unique nodes and links
-                const uniqueNodes = new Set();
-                const uniqueLinks = [];
-
-                tokenTransfers.forEach(transfer => {
-                    uniqueNodes.add(transfer.source);
-                    uniqueNodes.add(transfer.destination);
-                    uniqueLinks.push(transfer);
-                });
-
-                const nodes = Array.from(uniqueNodes);
-
-                setGraphData([{
-                    name: `transaction ${data.txHash}`,
-                    nodes,
-                    links: uniqueLinks,
-                }]);
-            } catch (error) {
-                console.error('Error fetching transaction data:', error);
-            }
-        };
-
         fetchTransactionData();
     }, []);
 
