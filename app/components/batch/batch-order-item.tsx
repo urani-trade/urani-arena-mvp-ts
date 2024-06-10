@@ -9,7 +9,7 @@ interface Props {
 export const BatchOrderItem:FC<Props> = ({batchOrderItem}) => {
 
     return (
-        <div className="flex items-center justify-between mb-1 p-1 bg-gray-700 rounded-lg">
+        <div className="flex items-center justify-between mb-1 p-1 bg-secondBrand rounded-lg">
             <div className="flex items-center w-1/2">
                 <img src={batchOrderItem.srcToken.image} alt={batchOrderItem.srcToken.name} className="w-8 h-8 mr-2 rounded-full"/>
                 <div>

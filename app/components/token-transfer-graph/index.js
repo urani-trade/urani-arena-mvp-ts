@@ -162,7 +162,7 @@ export const TokenTransferGraph = () => {
             .attr("orient", "auto")
             .append("path")
             .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "green");
+            .attr("fill", "white");
 
         // Add the links and the arrows
         const path = g.append("g").selectAll("path")
@@ -170,7 +170,7 @@ export const TokenTransferGraph = () => {
             .enter().append("path")
             .attr("class", "link")
             .attr("marker-end", "url(#end)")
-            .style("stroke", "green");
+            .style("stroke", "white");
 
         // Add the link labels
         const linkLabels = g.append("g").selectAll(".link-label")
@@ -178,7 +178,7 @@ export const TokenTransferGraph = () => {
             .enter().append("text")
             .attr("class", "link-label")
             .attr("dy", ".35em")
-            .style("fill", "green")
+            .style("fill", "white")
             .style("text-anchor", "middle")
             .text(d => d.value);
 
@@ -199,13 +199,13 @@ export const TokenTransferGraph = () => {
             .attr("x", -30)
             .attr("y", -10)
             .attr("fill", "transparent")
-            .attr("stroke", "green");
+            .attr("stroke", "white");
 
         // Add the text
         node.append("text")
             .attr("x", -25)
             .attr("dy", ".35em")
-            .style("fill", "green")
+            .style("fill", "white")
             .text(d => `${d.name.substring(0, 6)}...`);
 
         // Initialize the hull paths
