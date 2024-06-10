@@ -153,6 +153,7 @@ export const TokenTransferGraph = () => {
             .attr("class", "link-label")
             .attr("dy", ".35em")
             .style("fill", "white")
+            .style("text-anchor", "middle")
             .text(d => d.value);
 
         // Define the nodes
@@ -179,7 +180,7 @@ export const TokenTransferGraph = () => {
             .attr("x", -25)
             .attr("dy", ".35em")
             .style("fill", "white")
-            .text(d => `${d.name}`);
+            .text(d => `${d.name.substring(0, 6)}...`);
 
         // Initialize the hull paths
         let hullPath = g.selectAll(".hull");
@@ -203,18 +204,20 @@ export const TokenTransferGraph = () => {
 
             linkLabels
                 .attr("x", d => {
-                    const offset = 10;
+                    const offset = 20;
                     const delta = calculatePerpendicularOffset(d, offset);
-                    if (delta.dx < 0) {
-                        const newOffset = 25;
-                        return (d.source.x + d.target.x) / 2 + calculatePerpendicularOffset(d, newOffset).dx;
-                    }
                     return (d.source.x + d.target.x) / 2 + delta.dx;
                 })
                 .attr("y", d => {
-                    const offset = 10;
+                    const offset = 20;
                     const delta = calculatePerpendicularOffset(d, offset);
                     return (d.source.y + d.target.y) / 2 + delta.dy;
+                })
+                .attr("transform", d => {
+                    const angle = Math.atan2(d.target.y - d.source.y, d.target.x - d.source.x) * 180 / Math.PI;
+                    const x = (d.source.x + d.target.x) / 2 + calculatePerpendicularOffset(d, 10).dx;
+                    const y = (d.source.y + d.target.y) / 2 + calculatePerpendicularOffset(d, 10).dy;
+                    return `rotate(${(angle > 90 || angle < -90) ? angle + 180 : angle},${x},${y})`;
                 });
 
             // Update hulls
