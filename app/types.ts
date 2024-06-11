@@ -26,6 +26,7 @@ export interface ISolution {
 }
 
 export interface IBatchOrder {
+    id?: string;
     srcToken: {
         image: string;
         name: string;
