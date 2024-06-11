@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect, useRef, useState} from 'react';
+import React, {FC, useEffect, useRef, useState} from 'react';
 import {batchData} from "@/components/batch/batches-hardcode";
 import {BatchOrderList} from "@/components/batch/batch-order-list";
 import {SolutionsList} from "@/components/solutions/solutions-list";
@@ -8,7 +8,13 @@ import {Batch} from "@/types";
 
 const TIME_AUTO_CHANGE: number = 4000; // 4000 for develop and testing ( 40000 for prod)
 
-const OrderBatch = () => {
+interface Props {
+    batch: any;
+    selectedSolutionId: string;
+    handleSelectSolution: any;
+}
+
+const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId}) => {
     const [id,setId] = useState<number>(0);
     const [currentBatch,setCurrentBatch] = useState<Batch | null>(null);
 
@@ -89,7 +95,6 @@ const OrderBatch = () => {
     const changeCurrentBatch = (value:string) => {
         //at this place we have logic to get batch by number (need query)
     }
-
 
     return (
         <div>
@@ -174,7 +179,11 @@ const OrderBatch = () => {
 
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96">
                         <div className="font-semibold text-white mb-2 text-left">Solutions</div>
-                        <SolutionsList currentBatch={currentBatch}/>
+                        <SolutionsList
+                            currentBatch={currentBatch}
+                            selectedSolutionId={selectedSolutionId}
+                            handleSelectSolution={handleSelectSolution}
+                        />
                     </div>
                 </>
             }

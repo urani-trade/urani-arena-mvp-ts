@@ -3,12 +3,23 @@ import {ISolution} from "@/types";
 
 interface Props {
     solution: ISolution;
-    index: number
+    index: number;
+    isSelected: boolean;
+    onSelect: any;
 }
 
-export const SolutionItem:FC<Props> = ({solution, index}) => {
+export const SolutionItem:FC<Props> = ({solution, index, isSelected, onSelect}) => {
+
+    const handleClick = () => {
+        onSelect(solution.id);
+    };
+
     return (
-        <div  className="flex items-center justify-between mb-1 p-1 bg-secondBrand rounded-lg">
+        <div  className={`flex items-center justify-between border-2 mb-1 p-1 bg-secondBrand rounded-lg
+        ${isSelected ? 'border-white' : 'border-secondBrand'}
+        `}
+            onClick={handleClick}
+        >
             <div className="flex items-center">
                 <div className="font-semibold text-white mr-2">{(index + 1).toString()}</div>
                 <img src={solution.agentImage} alt={solution.agentName} className="w-8 h-8 mr-2 rounded-full"/>

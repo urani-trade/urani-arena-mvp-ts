@@ -13,7 +13,7 @@ export const BatchOrderList:FC<Props> = ({currentBatch}) => {
             <AnimatePresence >
                 {currentBatch && currentBatch.orders.map((order, index) => (
                     <motion.div
-                        key={order.id} // Assuming order has a unique `id` property
+                        key={order.id}
                         initial={{ opacity: 0, x: -100, position: 'absolute', top: 0 }}
                         animate={{ opacity: 1, x: 0, position: 'relative' }}
                         exit={{ opacity: 0, x: 100, position: 'absolute', top: 0 }}

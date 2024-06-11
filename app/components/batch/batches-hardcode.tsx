@@ -34,6 +34,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '5345345',
                 agentName: 'Scully',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -53,6 +54,7 @@ export const batchData: Batch[] = [
                 solutionScore: 95
             },
             {
+                id: '666673',
                 agentName: 'Mulder',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -128,6 +130,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '745456',
                 agentName: 'Arbitrium',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -147,6 +150,7 @@ export const batchData: Batch[] = [
                 solutionScore: 77
             },
             {
+                id: '0456568',
                 agentName: 'Aptos',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -162,6 +166,7 @@ export const batchData: Batch[] = [
                 solutionScore: 50
             },
             {
+                id: '335354',
                 agentName: 'Aptos 2.0',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -224,6 +229,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '53444545345',
                 agentName: 'Arbitrium 333',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -243,6 +249,7 @@ export const batchData: Batch[] = [
                 solutionScore: 99
             },
             {
+                id: '63459922',
                 agentName: 'Aptos rrr',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -292,6 +299,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '53474564565345',
                 agentName: 'Scully',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -311,6 +319,7 @@ export const batchData: Batch[] = [
                 solutionScore: 95
             },
             {
+                id: '534684565345',
                 agentName: 'Mulder',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -386,6 +395,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '534785675345',
                 agentName: 'Arbitrium',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -405,6 +415,7 @@ export const batchData: Batch[] = [
                 solutionScore: 77
             },
             {
+                id: '53468955345',
                 agentName: 'Aptos',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -420,6 +431,7 @@ export const batchData: Batch[] = [
                 solutionScore: 50
             },
             {
+                id: '53645745345',
                 agentName: 'Aptos 2.0',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -482,6 +494,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '5345773443455345',
                 agentName: 'Arbitrium 333',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -501,6 +514,7 @@ export const batchData: Batch[] = [
                 solutionScore: 99
             },
             {
+                id: '5342225345',
                 agentName: 'Aptos rrr',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -550,6 +564,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '53455563345',
                 agentName: 'Scully',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -569,7 +584,8 @@ export const batchData: Batch[] = [
                 solutionScore: 95
             },
             {
-                agentName: 'Mulder',
+                id: '534532245',
+                agentName: 'Mulder 1',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
                     {
@@ -644,6 +660,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '5555345345',
                 agentName: 'Arbitrium',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -663,6 +680,7 @@ export const batchData: Batch[] = [
                 solutionScore: 77
             },
             {
+                id: '53111145345',
                 agentName: 'Aptos',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -678,6 +696,7 @@ export const batchData: Batch[] = [
                 solutionScore: 50
             },
             {
+                id: '53453499995',
                 agentName: 'Aptos 2.0',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [
@@ -740,6 +759,7 @@ export const batchData: Batch[] = [
         ],
         solutions: [
             {
+                id: '5348340005345',
                 agentName: 'Arbitrium 333',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f676174657761792e697279732e78797a2f45537865704c707676536e3930674d716f4b2d4869346535557636442d58746348576256734e576a4e304d',
                 route: [
@@ -759,6 +779,7 @@ export const batchData: Batch[] = [
                 solutionScore: 99
             },
             {
+                id: '53459440345',
                 agentName: 'Aptos rrr',
                 agentImage: 'https://statics.solscan.io/cdn/imgs/s60?ref=68747470733a2f2f63662d697066732e636f6d2f697066732f516d634d50316f35767045523156646d67593248756947444b63793151445a78774d7079736e436868455937746b',
                 route: [

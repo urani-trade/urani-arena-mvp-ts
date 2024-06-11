@@ -16,6 +16,7 @@ export interface Batch {
 }
 
 export interface ISolution {
+    id?: string;
     agentName: string;
     agentImage: string;
     route: {
