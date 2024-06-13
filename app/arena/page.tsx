@@ -32,10 +32,10 @@ export default function Arena() {
 
   return (
     <div className="flex flex-col md:flex-row justify-center">
-      <div className="w-full md:w-8/10 order-2 md:order-1">
+      <div className="w-full w-8/10 order-2 md:order-1">
         <TokenTransferGraph solutions={batchData?.solutions} />
       </div>
-      <div className="w-full md:w-2/10 order-1 md:order-2 flex items-start  md:justify-end text-center md:text-left lg:ml-20">
+      <div className="w-2/10 order-1 md:order-2 flex items-start  md:justify-end text-center md:text-left lg:ml-20">
         <OrderBatch
             batch={batchData as IBatch}
             selectedSolutionId={selectedSolutionId as string}

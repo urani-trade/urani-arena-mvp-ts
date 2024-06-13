@@ -1,6 +1,8 @@
 
 
-const data = [
+
+
+export const dataHard = [
     {
         name: "Solution 1",
         nodes: ["Harry", "Mario", "Sarah", "Alice", "Eveie", "Peter", "James", "Roger"],
