@@ -1,22 +1,26 @@
 'use client';
 
-import React, {FC, useEffect, useRef, useState} from 'react';
-import {batchData} from "@/components/batch/batches-hardcode";
+import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {BatchOrderList} from "@/components/batch/batch-order-list";
 import {SolutionsList} from "@/components/solutions/solutions-list";
-import {Batch} from "@/types";
+import {IBatch} from "@/types";
+import {debounce} from "@/utils/utils";
 
 const TIME_AUTO_CHANGE: number = 4000; // 4000 for develop and testing ( 40000 for prod)
 
 interface Props {
-    batch: any;
+    batch: IBatch;
     selectedSolutionId: string;
-    handleSelectSolution: any;
+    handleSelectSolution: (id: string) => void;
+    handleChangeBatchId: (id: string) => void;
 }
 
-const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId}) => {
-    const [id,setId] = useState<number>(0);
-    const [currentBatch,setCurrentBatch] = useState<Batch | null>(null);
+const OrderBatch:FC<Props> = ({
+  batch,
+  handleSelectSolution,
+  selectedSolutionId,
+  handleChangeBatchId
+}) => {
 
     const [isRunning, setIsRunning] = useState<boolean>(false);
 
@@ -25,34 +29,36 @@ const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId})
     const startTimeRef = useRef<number>(0);
     const remainingTimeRef = useRef<number>(TIME_AUTO_CHANGE);
 
+    const [inputValueId, setInputValueId] = useState<string>(batch?.batchId.toString());
 
     useEffect(() => {
-        if (!isRunning || id >= batchData.length) return;
+        if(batch?.batchId){
+            setInputValueId(batch?.batchId.toString());
+        }
+    }, [batch]);
 
-        setCurrentBatch(batchData[id]);
+    useEffect(() => {
+        if (!isRunning || !batch) return;
 
         startTimeRef.current = Date.now();
         timerRef.current = setTimeout(() => {
-            setElapsedTime(0);
-            if (id < batchData.length - 1) {
-                setId((prevId) => prevId + 1);
-                remainingTimeRef.current = TIME_AUTO_CHANGE;
-            } else {
-                setIsRunning(false);
-            }
+            const nextBatchId = (batch.batchId + 1).toString();
+            handleChangeBatchId(nextBatchId);
+            remainingTimeRef.current = TIME_AUTO_CHANGE;
         }, remainingTimeRef.current);
 
         return () => {
-            clearTimeout(timerRef.current as NodeJS.Timeout);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current as NodeJS.Timeout);
+            }
         };
-    }, [isRunning, id, batchData]);
+    }, [isRunning,batch, handleChangeBatchId]);
 
     useEffect(() => {
-        if (batchData.length > 0) {
-            setCurrentBatch(batchData[0]);
+        if (batch) {
             startTimer();
         }
-    }, [batchData]);
+    }, [batch]);
 
     const startTimer = () => {
         if (!isRunning) {
@@ -63,47 +69,55 @@ const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId})
     const pauseTimer = () => {
         if (isRunning) {
             setIsRunning(false);
-            clearTimeout(timerRef.current as NodeJS.Timeout);
-            const timePassed = Date.now() - startTimeRef.current;
+            if (timerRef.current) {
+                clearTimeout(timerRef.current as NodeJS.Timeout);
+            }
+            const timePassed = Date.now() - (Date.now() - remainingTimeRef.current);
             remainingTimeRef.current -= timePassed;
         }
     };
 
     const resetTimer = () => {
         setIsRunning(false);
-        setId(0);
-        setElapsedTime(0);
         remainingTimeRef.current = TIME_AUTO_CHANGE;
-        setCurrentBatch(batchData[0] || null);
-        clearTimeout(timerRef.current as NodeJS.Timeout);
+        if (timerRef.current) {
+            clearTimeout(timerRef.current as NodeJS.Timeout);
+        }
     };
 
     const prevBatch = () => {
-        if (id > 0) {
-            setId((prevId) => prevId - 1);
-            setCurrentBatch(batchData[id - 1]);
+        if (batch && batch.batchId > 1) {
+            const prevBatchId = (batch.batchId - 1).toString();
+            handleChangeBatchId(prevBatchId);
         }
     };
 
     const nextBatch = () => {
-        if (id < batchData.length - 1) {
-            setId((prevId) => prevId + 1);
-            setCurrentBatch(batchData[id + 1]);
+        if (batch) {
+            const nextBatchId = (batch.batchId + 1).toString();
+            handleChangeBatchId(nextBatchId);
         }
     };
 
-    const changeCurrentBatch = (value:string) => {
-        //at this place we have logic to get batch by number (need query)
-    }
+    const debouncedHandleChangeBatchId = useRef(debounce(handleChangeBatchId, 600)).current;
+
+
+    const changeCurrentBatch = useCallback((value: string) => {
+        const sanitizedValue = value.replace(/[^0-9]/g, '');
+        setInputValueId(sanitizedValue);
+        if (sanitizedValue) {
+            debouncedHandleChangeBatchId(sanitizedValue);
+        }
+    }, [debouncedHandleChangeBatchId]);
 
     return (
         <div>
             <div className="container flex justify-between items-center bg-transparent mb-4 m-auto">
                 <button
                     className={`w-10 h-10 flex items-center justify-center rounded-full border-2 border-white text-white transition duration-200
-                          ${id === 0 ? 'bg-brandDisabled text-arrowDisabled border-brandBorderDisabled cursor-not-allowed' : 'hover:bg-brand hover:text-white'}`}
+                          ${batch && batch.batchId === 1 ? 'bg-brandDisabled text-arrowDisabled border-brandBorderDisabled cursor-not-allowed' : 'hover:bg-brand hover:text-white'}`}
                     onClick={prevBatch}
-                    disabled={id === 0}
+                    disabled={batch && batch.batchId === 1}
                 >
                     <svg
                         className="w-6 h-6"
@@ -124,15 +138,14 @@ const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId})
                     <h2 className="font-semibold text-white text-center mr-3">Batch #</h2>
                     <input style={{ width: '137px' }}
                         className="bg-transparent border-2 border-secondBrand rounded-md text-white text-center"
-                        value={currentBatch?.batchNumber.toString()}
+                        value={inputValueId}
                         onChange={(event) => changeCurrentBatch(event.target.value)}
                     />
                 </div>
                 <button
                     className={`w-10 h-10 flex items-center justify-center rounded-full border-2 border-white text-white transition duration-200
-                            ${id === batchData.length - 1 ? 'bg-brandDisabled border-brandBorderDisabled text-arrowDisabled' : 'hover:bg-brand hover:text-white'}`}
+                        hover:bg-brand hover:text-white`}
                     onClick={nextBatch}
-                    disabled={id === batchData.length - 1}
                 >
                     <svg
                         className="w-6 h-6"
@@ -151,7 +164,7 @@ const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId})
                 </button>
             </div>
             {
-                currentBatch &&
+                batch &&
                 <>
                     <div className="container rounded-lg mb-4">
                         <button
@@ -174,13 +187,13 @@ const OrderBatch:FC<Props> = ({batch, handleSelectSolution, selectedSolutionId})
                     </div>
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96 mb-4">
                         <div className="font-semibold text-white mb-4 text-left">Orders</div>
-                        <BatchOrderList currentBatch={currentBatch}/>
+                        <BatchOrderList currentBatch={batch}/>
                     </div>
 
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96">
                         <div className="font-semibold text-white mb-2 text-left">Solutions</div>
                         <SolutionsList
-                            currentBatch={currentBatch}
+                            currentBatch={batch}
                             selectedSolutionId={selectedSolutionId}
                             handleSelectSolution={handleSelectSolution}
                         />

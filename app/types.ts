@@ -15,15 +15,48 @@ export interface Batch {
     solutions: ISolution[];
 }
 
+export interface IBatch {
+    batchId: number;
+    orders: IOrder[];
+    solutions: ISolution[];
+    fillData: {
+        agentName: string;
+        tx: string;
+        route: IRoute[];
+    }
+}
+
+export interface IOrder {
+    dstAddress: string;
+    dstToken: string;
+    expiration: number;
+    intentId: number;
+    minReceived: number;
+    srcAddress: string;
+    srcAmount: number;
+    srcToken: string;
+    status: string;
+}
+
+export interface IRoute {
+    dstAddress: string;
+    dstImage: string;
+    dstName: string;
+    sentAmount: number;
+    sentToken: string;
+    srcAddress: string;
+    srcImage: string;
+    srcName: string;
+}
+
 export interface ISolution {
     id?: string;
-    agentName: string;
-    agentImage: string;
-    route: {
-            venueName: string;
-            venueImage: string;
-    }[];
-    solutionScore: number;
+    agent: {
+        image: string;
+        name: string;
+    }
+    route: IRoute[];
+    score: number;
 }
 
 export interface IBatchOrder {

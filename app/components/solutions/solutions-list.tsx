@@ -1,11 +1,11 @@
 
 import React, {FC} from "react";
 import {SolutionItem} from "@/components/solutions/solution-item";
-import {Batch, ISolution} from "@/types";
+import {IBatch, ISolution} from "@/types";
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
-    currentBatch:Batch;
+    currentBatch: IBatch;
     selectedSolutionId: string;
     handleSelectSolution: any;
 }

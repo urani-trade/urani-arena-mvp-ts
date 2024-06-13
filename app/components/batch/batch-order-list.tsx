@@ -1,10 +1,10 @@
 import React, {FC} from "react";
 import {BatchOrderItem} from "@/components/batch/batch-order-item";
-import {Batch} from "@/types";
+import {IBatch} from "@/types";
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
-    currentBatch: Batch;
+    currentBatch: IBatch;
 }
 
 export const BatchOrderList:FC<Props> = ({currentBatch}) => {
@@ -13,13 +13,13 @@ export const BatchOrderList:FC<Props> = ({currentBatch}) => {
             <AnimatePresence >
                 {currentBatch && currentBatch.orders.map((order, index) => (
                     <motion.div
-                        key={order.id}
+                        key={order.intentId}
                         initial={{ opacity: 0, x: -100, position: 'absolute', top: 0 }}
                         animate={{ opacity: 1, x: 0, position: 'relative' }}
                         exit={{ opacity: 0, x: 100, position: 'absolute', top: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-                        <BatchOrderItem key={order.id} batchOrderItem={order} />
+                        <BatchOrderItem key={order.intentId} batchOrderItem={order} />
                     </motion.div>
                 ))}
             </AnimatePresence>

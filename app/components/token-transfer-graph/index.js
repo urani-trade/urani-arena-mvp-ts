@@ -4,72 +4,48 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './index.css';
 
-export const TokenTransferGraph = ({batch}) => {
+export const TokenTransferGraph = ({solutions}) => {
     const [graphData, setGraphData] = useState(null);
     const graphRef = useRef(null);
 
     const [oneSolutionView, setOneSolutionView] = useState(false);
     const [currentSolution, setCurrentSolution] = useState(null);
 
-    useEffect(() => {
-        const data = [
-            {
-                name: "Solution 1",
-                nodes: ["Harry", "Mario", "Sarah", "Alice", "Eveie", "Peter", "James", "Roger"],
-                links: [
-                    { source: "Harry", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "Alice", value: "SOL" },
-                    { source: "Eveie", destination: "Alice", value: "SOL" },
-                    { source: "Peter", destination: "Alice", value: "SOL" },
-                    { source: "Mario", destination: "Alice", value: "SOL" },
-                    { source: "James", destination: "Alice", value: "SOL" },
-                    { source: "Alice", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "James", value: "SOL" },
-                    { source: "Roger", destination: "James", value: "SOL" },
-                    { source: "James", destination: "Roger", value: "SOL" },
-                    { source: "Alice", destination: "Peter", value: "SOL" },
-                    { source: "Alice", destination: "Eveie", value: "SOL" },
-                    { source: "Harry", destination: "Eveie", value: "SOL" },
-                    { source: "Eveie", destination: "Harry", value: "SOL" },
-                    { source: "James", destination: "Sarah", value: "SOL" },
-                    { source: "Alice", destination: "Sarah", value: "SOL" }
-                ]
-            },
-            {
-                name: "Solution 2",
-                nodes: ["0xRekt", "0xBeef", "0xDead"],
-                links: [
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" },
-                    { source: "0xBeef", destination: "0xRekt", value: "ETH" },
-                    { source: "0xBeef", destination: "0xDead", value: "ETH" },
-                    { source: "0xDead", destination: "0xRekt", value: "ETH" },
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" }
-                ]
-            },
-            {
-                name: "Solution 3",
-                nodes: ["Jake", "Bob", "Charlie", "Dave"],
-                links: [
-                    { source: "Jake", destination: "Bob", value: "BTC" },
-                    { source: "Bob", destination: "Charlie", value: "BTC" },
-                    { source: "Charlie", destination: "Dave", value: "BTC" },
-                    { source: "Dave", destination: "Jake", value: "BTC" }
-                ]
-            },
-            {
-                name: "Solution 4",
-                nodes: ["X", "Y", "Z"],
-                links: [
-                    { source: "X", destination: "Y", value: "LTC" },
-                    { source: "Y", destination: "Z", value: "LTC" },
-                    { source: "Z", destination: "X", value: "LTC" },
-                    { source: "X", destination: "Z", value: "LTC" }
-                ]
-            }
-        ];
+    const convertToLinks = (route) => {
+        return route.map(item => ({
+            source: item.srcName,
+            destination: item.dstName,
+            value: item.sentToken.substring(0, 3).toUpperCase()
+        }));
+    };
 
-        setGraphData(data);
-    }, []);
+
+
+    useEffect(() => {
+            if(solutions?.length > 0) {
+                const data =   solutions.map((solution)=> {
+                     const uniqueItems = new Set(); // Змінюємо на Set для унікальності
+
+                     solution.route.forEach(item => {
+                         uniqueItems.add(item.srcName);
+                         uniqueItems.add(item.dstName);
+                     });
+
+                     const finalUniqueNameArray = Array.from(uniqueItems);
+
+
+                        return  {
+                                name: solution.agent.name,
+                                nodes: finalUniqueNameArray,
+                                links: convertToLinks(solution.route)
+                            }
+                });
+
+                console.log('data',data);
+
+                setGraphData(data);
+            }
+    }, [solutions]);
 
     useEffect(() => {
         if (!graphData) return;
