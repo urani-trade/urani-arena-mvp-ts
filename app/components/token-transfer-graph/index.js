@@ -1,9 +1,8 @@
-"use client";  // Ensure this component is treated as a Client Component
+"use client";
 
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './index.css';
-import {dataHard} from "../batch/batches-hardcode";
 
 export const TokenTransferGraph = ({solutions}) => {
     const [graphData, setGraphData] = useState(null);
@@ -68,7 +67,7 @@ export const TokenTransferGraph = ({solutions}) => {
 
         const g = svg.append("g");
 
-        const radius = Math.min(viewBoxWidth, viewBoxHeight) / 4; // Зменшено радіус для більшого наближення
+        const radius = Math.min(viewBoxWidth, viewBoxHeight) / 4;
         const angleStep = (2 * Math.PI) / graphData.length;
         const centerX = viewBoxWidth / 2;
         const centerY = viewBoxHeight / 2;
@@ -77,7 +76,6 @@ export const TokenTransferGraph = ({solutions}) => {
             let xOffset = centerX + radius * Math.cos(index * angleStep) - viewBoxWidth / 8;
             let yOffset = centerY + radius * Math.sin(index * angleStep) - viewBoxHeight / 8;
 
-            // Перевірка, чи графік не виходить за межі полотна
             xOffset = Math.max(0, Math.min(xOffset, viewBoxWidth - 100));
             yOffset = Math.max(0, Math.min(yOffset, viewBoxHeight - 100));
 
@@ -93,7 +91,7 @@ export const TokenTransferGraph = ({solutions}) => {
             }));
 
             const simulation = d3.forceSimulation(nodes)
-                .force("link", d3.forceLink(links).id((d) => d.name).distance(40))
+                .force("link", d3.forceLink(links).id((d) => d.name).distance(100))
                 .force("charge", d3.forceManyBody().strength(-200))
                 .force("center", d3.forceCenter(0, 0))
                 .on("tick", tick);
@@ -134,6 +132,20 @@ export const TokenTransferGraph = ({solutions}) => {
                 .attr("marker-end", "url(#end)")
                 .style("stroke", "white");
 
+            // Add labels to links
+            graphGroup.selectAll(".link-label")
+                .data(links)
+                .enter()
+                .append("text")
+                .attr("class", "link-label")
+                .attr("fill", "white")
+                .attr("dy", -5) // Adjust this to position labels perpendicular to the link
+                .append("textPath")
+                .attr("xlink:href", (d, i) => `#link${i}`)
+                .attr("startOffset", "50%")
+                .style("text-anchor", "middle")
+                .text(d => d.value);
+
             const node = graphGroup
                 .selectAll(".node")
                 .data(nodes)
@@ -150,31 +162,43 @@ export const TokenTransferGraph = ({solutions}) => {
 
             node
                 .append("rect")
+                .attr("rx", 10) // Rounded corners
+                .attr("ry", 10) // Rounded corners
                 .attr("width", 60)
                 .attr("height", 20)
                 .attr("x", -30)
                 .attr("y", -10)
-                .attr("fill", "transparent")
-                .attr("stroke", "white");
+                .attr("fill", "#C9CAF9") // Fill color
+                .attr("stroke", "none"); // Remove border
 
             node
                 .append("text")
                 .attr("x", -25)
                 .attr("dy", ".35em")
-                .style("fill", "white")
+                .style("fill", "#362B67") // Text color
                 .text((d) => `${d.name.substring(0, 6)}...`);
 
             function tick() {
                 node.attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-                link.attr("d", (d) => {
+                link.attr("d", (d, i) => {
                     const sourceX = d.source.x;
                     const sourceY = d.source.y;
                     const targetX = d.target.x;
                     const targetY = d.target.y;
 
-                    return `M${sourceX},${sourceY}L${targetX},${targetY}`;
+                    // Adjust positions to keep a small distance from the node
+                    return `M${sourceX + (sourceX < targetX ? 10 : -10)},${sourceY + (sourceY < targetY ? 10 : -10)}L${targetX - (targetX < sourceX ? 10 : -10)},${targetY - (targetY < sourceY ? 10 : -10)}`;
                 });
+
+                graphGroup.selectAll(".link-label")
+                    .attr("transform", function (d) {
+                        if (d.target.x < d.source.x) {
+                            const bbox = this.getBBox();
+                            return `rotate(180, ${bbox.x + bbox.width / 2}, ${bbox.y + bbox.height / 2})`;
+                        }
+                        return 'rotate(0)';
+                    });
             }
 
             function dragstarted(event, d) {
@@ -231,7 +255,7 @@ export const TokenTransferGraph = ({solutions}) => {
             let xOffset = centerX + radius * Math.cos(index * angleStep) - viewBoxWidth / 8;
             let yOffset = centerY + radius * Math.sin(index * angleStep) - viewBoxHeight / 8;
 
-            // Перевірка, чи графік не виходить за межі полотна
+
             xOffset = Math.max(0, Math.min(xOffset, viewBoxWidth - 100));
             yOffset = Math.max(0, Math.min(yOffset, viewBoxHeight - 100));
 
@@ -247,7 +271,7 @@ export const TokenTransferGraph = ({solutions}) => {
             }));
 
             const simulation = d3.forceSimulation(nodes)
-                .force("link", d3.forceLink(links).id((d) => d.name).distance(40))
+                .force("link", d3.forceLink(links).id((d) => d.name).distance(100))
                 .force("charge", d3.forceManyBody().strength(-200))
                 .force("center", d3.forceCenter(0, 0))
                 .on("tick", tick);
@@ -288,6 +312,20 @@ export const TokenTransferGraph = ({solutions}) => {
                 .attr("marker-end", "url(#end)")
                 .style("stroke", "white");
 
+            // Add labels to links
+            graphGroup.selectAll(".link-label")
+                .data(links)
+                .enter()
+                .append("text")
+                .attr("class", "link-label")
+                .attr("fill", "white")
+                .attr("dy", -5) // Adjust this to position labels perpendicular to the link
+                .append("textPath")
+                .attr("xlink:href", (d, i) => `#link${i}`)
+                .attr("startOffset", "50%")
+                .style("text-anchor", "middle")
+                .text(d => d.value);
+
             const node = graphGroup
                 .selectAll(".node")
                 .data(nodes)
@@ -304,31 +342,43 @@ export const TokenTransferGraph = ({solutions}) => {
 
             node
                 .append("rect")
+                .attr("rx", 10) // Rounded corners
+                .attr("ry", 10) // Rounded corners
                 .attr("width", 60)
                 .attr("height", 20)
                 .attr("x", -30)
                 .attr("y", -10)
-                .attr("fill", "transparent")
-                .attr("stroke", "white");
+                .attr("fill", "#C9CAF9") // Fill color
+                .attr("stroke", "none"); // Remove border
 
             node
                 .append("text")
                 .attr("x", -25)
                 .attr("dy", ".35em")
-                .style("fill", "white")
+                .style("fill", "#362B67") // Text color
                 .text((d) => `${d.name.substring(0, 6)}...`);
 
             function tick() {
                 node.attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-                link.attr("d", (d) => {
+                link.attr("d", (d, i) => {
                     const sourceX = d.source.x;
                     const sourceY = d.source.y;
                     const targetX = d.target.x;
                     const targetY = d.target.y;
 
-                    return `M${sourceX},${sourceY}L${targetX},${targetY}`;
+                    // Adjust positions to keep a small distance from the node
+                    return `M${sourceX + (sourceX < targetX ? 10 : -10)},${sourceY + (sourceY < targetY ? 10 : -10)}L${targetX - (targetX < sourceX ? 10 : -10)},${targetY - (targetY < sourceY ? 10 : -10)}`;
                 });
+
+                graphGroup.selectAll(".link-label")
+                    .attr("transform", function (d) {
+                        if (d.target.x < d.source.x) {
+                            const bbox = this.getBBox();
+                            return `rotate(180, ${bbox.x + bbox.width / 2}, ${bbox.y + bbox.height / 2})`;
+                        }
+                        return 'rotate(0)';
+                    });
             }
 
             function dragstarted(event, d) {
@@ -382,7 +432,7 @@ export const TokenTransferGraph = ({solutions}) => {
         }));
 
         const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id((d) => d.name).distance(60))
+            .force("link", d3.forceLink(links).id((d) => d.name).distance(100))
             .force("charge", d3.forceManyBody().strength(-200))
             .force("center", d3.forceCenter(viewBoxWidth / 2, viewBoxHeight / 2))
             .force("tangential", tangentialForce(2, viewBoxWidth / 2, viewBoxHeight / 2))
@@ -429,6 +479,20 @@ export const TokenTransferGraph = ({solutions}) => {
             .attr("marker-end", "url(#end)")
             .style("stroke", "white");
 
+        // Add labels to links
+        g.selectAll(".link-label")
+            .data(links)
+            .enter()
+            .append("text")
+            .attr("class", "link-label")
+            .attr("fill", "white")
+            .attr("dy", -5) // Adjust this to position labels perpendicular to the link
+            .append("textPath")
+            .attr("xlink:href", (d, i) => `#link${i}`)
+            .attr("startOffset", "50%")
+            .style("text-anchor", "middle")
+            .text(d => d.value);
+
         const node = g
             .selectAll(".node")
             .data(nodes)
@@ -448,31 +512,43 @@ export const TokenTransferGraph = ({solutions}) => {
 
         node
             .append("rect")
+            .attr("rx", 10) // Rounded corners
+            .attr("ry", 10) // Rounded corners
             .attr("width", 60)
             .attr("height", 20)
             .attr("x", -30)
             .attr("y", -10)
-            .attr("fill", "transparent")
-            .attr("stroke", "white");
+            .attr("fill", "#C9CAF9") // Fill color
+            .attr("stroke", "none"); // Remove border
 
         node
             .append("text")
             .attr("x", -25)
             .attr("dy", ".35em")
-            .style("fill", "white")
+            .style("fill", "#362B67") // Text color
             .text((d) => `${d.name.substring(0, 6)}...`);
 
         function tick() {
             node.attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-            link.attr("d", (d) => {
+            link.attr("d", (d, i) => {
                 const sourceX = d.source.x;
                 const sourceY = d.source.y;
                 const targetX = d.target.x;
                 const targetY = d.target.y;
 
-                return `M${sourceX},${sourceY}L${targetX},${targetY}`;
+                // Adjust positions to keep a small distance from the node
+                return `M${sourceX + (sourceX < targetX ? 10 : -10)},${sourceY + (sourceY < targetY ? 10 : -10)}L${targetX - (targetX < sourceX ? 10 : -10)},${targetY - (targetY < sourceY ? 10 : -10)}`;
             });
+
+            g.selectAll(".link-label")
+                .attr("transform", function (d) {
+                    if (d.target.x < d.source.x) {
+                        const bbox = this.getBBox();
+                        return `rotate(180, ${bbox.x + bbox.width / 2}, ${bbox.y + bbox.height / 2})`;
+                    }
+                    return 'rotate(0)';
+                });
         }
 
         function dragstarted(event, d) {
@@ -507,7 +583,6 @@ export const TokenTransferGraph = ({solutions}) => {
             };
         }
 
-        // Анімація для збільшення графіка
         svg
             .transition()
             .duration(750)
