@@ -16,10 +16,11 @@ interface IUniqueArray {
 export const SolutionItem:FC<Props> = ({solution, index, isSelected, onSelect}) => {
 
     const handleClick = () => {
-        onSelect(solution.id);
+        onSelect(solution.agent.name.replace(/\s/g,''));
     };
-    const [uniqueArrayImages, setUniqueArrayImages] = useState<IUniqueArray[]>([]);
+    const [uniqueVenues, setUniqueVenues] = useState<IUniqueArray[]>([]);
 
+    // deriving the unique venues from the solution route.
     useEffect(() => {
         const uniqueItems: any = {};
         const uniqueArray: IUniqueArray[] = [];
@@ -40,7 +41,7 @@ export const SolutionItem:FC<Props> = ({solution, index, isSelected, onSelect}) 
                 uniqueArray.push(uniqueItems[item.dstName]);
             }
         });
-        setUniqueArrayImages(uniqueArray);
+        setUniqueVenues(uniqueArray);
     }, [solution]);
 
 
@@ -56,7 +57,7 @@ export const SolutionItem:FC<Props> = ({solution, index, isSelected, onSelect}) 
                 <div className="font-semibold text-white">{solution.agent.name}</div>
             </div>
             <div className="relative flex items-center justify-center w-32">
-                {uniqueArrayImages?.length > 0 && uniqueArrayImages.slice(0, 5).map((venue, venueIndex) => (
+                {uniqueVenues?.length > 0 && uniqueVenues.slice(0, 5).map((venue, venueIndex) => (
                     <img
                         key={venueIndex}
                         src={venue.image}
@@ -65,12 +66,12 @@ export const SolutionItem:FC<Props> = ({solution, index, isSelected, onSelect}) 
                         style={{ left: `${venueIndex * 20}px` }}
                     />
                 ))}
-                {(uniqueArrayImages?.length - 5) > 0 && (
+                {(uniqueVenues?.length - 5) > 0 && (
                     <div
                         className="w-6 h-6 rounded-full absolute flex items-center justify-center text-xs bg-backgroundPage text-white"
                         style={{ left: `${5 * 20}px` }}
                     >
-                        +{uniqueArrayImages?.length - 5}
+                        +{uniqueVenues?.length - 5}
                     </div>
                 )}
             </div>

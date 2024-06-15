@@ -27,7 +27,6 @@ export const BatchOrderItem:FC<Props> = ({batchOrderItem}) => {
             </div>
             <div className="flex items-center w-1/2 justify-end">
                 <div className="mr-2 text-right">
-                    <div className="text-gray-400 text-sm">{(batchOrderItem.srcAmount+200).toString()}</div>
                     <div className="font-semibold text-white text-sm">{batchOrderItem.dstToken.slice(0,3).toUpperCase()}</div>
                 </div>
                 <img src={imageTarget} alt={batchOrderItem.dstToken} className="w-8 h-8 rounded-full"/>

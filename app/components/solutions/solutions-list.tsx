@@ -18,17 +18,17 @@ export const SolutionsList:FC<Props> = ({currentBatch, selectedSolutionId, handl
             <AnimatePresence >
                 {currentBatch.solutions.map((solution: ISolution, index:number) =>
                     <motion.div
-                        key={solution.id}
+                        key={solution.agent.name}
                         initial={{ opacity: 0, x: -100, position: 'absolute', top: 0 }}
                         animate={{ opacity: 1, x: 0, position: 'relative' }}
                         exit={{ opacity: 0, x: 100, position: 'absolute', top: 0 }}
                         transition={{ duration: 0.5 }}
                     >
                         <SolutionItem
-                            key={solution.id}
+                            key={solution.agent.name}
                             solution={solution}
                             index={index}
-                            isSelected={solution.id === selectedSolutionId}
+                            isSelected={solution.agent.name.replace(/\s/g,'') === selectedSolutionId}
                             onSelect={handleSelectSolution}
                         />
                     </motion.div>

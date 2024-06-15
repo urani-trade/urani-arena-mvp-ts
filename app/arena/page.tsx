@@ -6,18 +6,23 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import {log} from "next/dist/server/typescript/utils";
 import {IBatch} from "@/types";
+import * as process from "process";
 
 export default function Arena() {
 
     const [batchData, setBatchData] = useState<IBatch | null>(null);
 
-    const [selectedSolutionId, setSelectedSolutionId] = useState<string>('1');
+    const [liveStream,setLiveStream] = useState<boolean>(true);
+
+    const [selectedSolutionId, setSelectedSolutionId] = useState<string>('');
+    const [selectedBatchId, setSelectedBatchId] = useState<string>('1');
+
+    const [oneSolutionView,setOneSolutionView] = useState<boolean>(false);
 
     const fetchData = async (id:string) => {
         try {
             const response = await axios.get(
                 `http://ec2-18-118-1-69.us-east-2.compute.amazonaws.com/api/batches/${id}`);
-            console.log('response', response.data);
             setBatchData(response.data);
         } catch (error) {
             console.error('Error:', error);
@@ -25,23 +30,40 @@ export default function Arena() {
     };
 
     useEffect(() => {
-        fetchData(selectedSolutionId);
-    }, [selectedSolutionId]);
+         fetchData(selectedBatchId);
+    }, [selectedBatchId]);
 
+    const fetchBatchId = (id:string) => {
+        setSelectedBatchId(id);
+    }
 
 
   return (
     <div className="flex flex-col md:flex-row justify-center">
       <div className="w-full w-8/10 order-2 md:order-1">
-        <TokenTransferGraph solutions={batchData?.solutions} />
+        <TokenTransferGraph
+            solutions={batchData?.solutions}
+            setSelectedSolutionId={setSelectedSolutionId}
+            selectedSolutionId={selectedSolutionId}
+            liveStream={liveStream}
+            setLiveStream={setLiveStream}
+        />
       </div>
       <div className="w-2/10 order-1 md:order-2 flex items-start  md:justify-end text-center md:text-left lg:ml-20">
-        <OrderBatch
-            batch={batchData as IBatch}
-            selectedSolutionId={selectedSolutionId as string}
-            handleSelectSolution={setSelectedSolutionId}
-            handleChangeBatchId={setSelectedSolutionId}
-        />
+          {
+              batchData &&
+              <OrderBatch
+                  batch={batchData as IBatch}
+                  selectedSolutionId={selectedSolutionId as string}
+                  handleSelectSolution={setSelectedSolutionId}
+                  liveStream={liveStream}
+                  setLiveStream={setLiveStream}
+                  fetchBatchId={fetchBatchId}
+                  setOneSolutionView={setOneSolutionView}
+                  oneSolutionView={oneSolutionView}
+              />
+          }
+
       </div>
     </div>
   );

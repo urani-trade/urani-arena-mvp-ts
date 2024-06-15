@@ -50,7 +50,6 @@ export interface IRoute {
 }
 
 export interface ISolution {
-    id?: string;
     agent: {
         image: string;
         name: string;

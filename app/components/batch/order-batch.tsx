@@ -12,22 +12,28 @@ interface Props {
     batch: IBatch;
     selectedSolutionId: string;
     handleSelectSolution: (id: string) => void;
-    handleChangeBatchId: (id: string) => void;
+    fetchBatchId: (id: string) => void;
+    liveStream:boolean;
+    setLiveStream: (stream: boolean) => void;
+    setOneSolutionView: (solutionView: boolean) => void;
+    oneSolutionView: boolean;
 }
 
 const OrderBatch:FC<Props> = ({
   batch,
   handleSelectSolution,
   selectedSolutionId,
-  handleChangeBatchId
+  liveStream,
+  setLiveStream,
+  fetchBatchId,
+  setOneSolutionView,
+  oneSolutionView
 }) => {
 
     const [isRunning, setIsRunning] = useState<boolean>(false);
-
-    const [elapsedTime, setElapsedTime] = useState<number>(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const startTimeRef = useRef<number>(0);
     const remainingTimeRef = useRef<number>(TIME_AUTO_CHANGE);
+    const startTimeRef = useRef<number | null>(null); // Time when the timer was started
 
     const [inputValueId, setInputValueId] = useState<string>(batch?.batchId.toString());
 
@@ -38,21 +44,31 @@ const OrderBatch:FC<Props> = ({
     }, [batch]);
 
     useEffect(() => {
+        if (liveStream) {
+            resumeTimer();
+        } else {
+            pauseTimer();
+        }
+    }, [liveStream]);
+
+    useEffect(() => {
         if (!isRunning || !batch) return;
 
         startTimeRef.current = Date.now();
         timerRef.current = setTimeout(() => {
-            const nextBatchId = (batch.batchId + 1).toString();
-            handleChangeBatchId(nextBatchId);
-            remainingTimeRef.current = TIME_AUTO_CHANGE;
+            if (isRunning) {
+                const nextBatchId = (batch.batchId + 1).toString();
+                fetchBatchId(nextBatchId);
+                remainingTimeRef.current = TIME_AUTO_CHANGE;
+            }
         }, remainingTimeRef.current);
 
         return () => {
             if (timerRef.current) {
-                clearTimeout(timerRef.current as NodeJS.Timeout);
+                clearTimeout(timerRef.current);
             }
         };
-    }, [isRunning,batch, handleChangeBatchId]);
+    }, [isRunning, batch]);
 
     useEffect(() => {
         if (batch) {
@@ -60,46 +76,85 @@ const OrderBatch:FC<Props> = ({
         }
     }, [batch]);
 
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+        };
+    }, []);
+
     const startTimer = () => {
-        if (!isRunning) {
+        if (!isRunning && batch) {
             setIsRunning(true);
+            startTimeRef.current = Date.now();
+            scheduleBatchChange();
         }
+    };
+
+    const scheduleBatchChange = () => {
+        timerRef.current = setTimeout(() => {
+            if (isRunning) {
+                const nextBatchId = (batch.batchId + 1).toString();
+                fetchBatchId(nextBatchId);
+                remainingTimeRef.current = TIME_AUTO_CHANGE;
+                startTimeRef.current = Date.now();
+                scheduleBatchChange(); // Schedule the next batch change
+            }
+        }, remainingTimeRef.current);
     };
 
     const pauseTimer = () => {
         if (isRunning) {
+            setLiveStream(false);
             setIsRunning(false);
             if (timerRef.current) {
-                clearTimeout(timerRef.current as NodeJS.Timeout);
+                clearTimeout(timerRef.current);
             }
-            const timePassed = Date.now() - (Date.now() - remainingTimeRef.current);
-            remainingTimeRef.current -= timePassed;
+            if (startTimeRef.current) {
+                const elapsedTime = Date.now() - startTimeRef.current;
+                remainingTimeRef.current -= elapsedTime;
+                startTimeRef.current = null;
+            }
+        }
+    };
+
+    const resumeTimer = () => {
+        if (!isRunning && batch) {
+            setLiveStream(true);
+            setIsRunning(true);
+            startTimeRef.current = Date.now();
+            scheduleBatchChange();
         }
     };
 
     const resetTimer = () => {
         setIsRunning(false);
         remainingTimeRef.current = TIME_AUTO_CHANGE;
+        startTimeRef.current = null;
         if (timerRef.current) {
-            clearTimeout(timerRef.current as NodeJS.Timeout);
+            clearTimeout(timerRef.current);
         }
     };
 
     const prevBatch = () => {
         if (batch && batch.batchId > 1) {
             const prevBatchId = (batch.batchId - 1).toString();
-            handleChangeBatchId(prevBatchId);
+            fetchBatchId(prevBatchId);
+            resetTimer(); // Reset the timer when switching batches manually
+            startTimer();
         }
     };
 
     const nextBatch = () => {
         if (batch) {
             const nextBatchId = (batch.batchId + 1).toString();
-            handleChangeBatchId(nextBatchId);
+            fetchBatchId(nextBatchId);
+            resetTimer(); // Reset the timer when switching batches manually
+            startTimer();
         }
     };
-
-    const debouncedHandleChangeBatchId = useRef(debounce(handleChangeBatchId, 600)).current;
+    const debouncedHandleChangeBatchId = useRef(debounce(fetchBatchId, 600)).current;
 
 
     const changeCurrentBatch = useCallback((value: string) => {
@@ -107,8 +162,15 @@ const OrderBatch:FC<Props> = ({
         setInputValueId(sanitizedValue);
         if (sanitizedValue) {
             debouncedHandleChangeBatchId(sanitizedValue);
+            resetTimer(); // Reset the timer when changing batches manually
+            startTimer();
         }
     }, [debouncedHandleChangeBatchId]);
+
+    const handleSelectSolutionWithPause = (id:string) => {
+        pauseTimer();
+        handleSelectSolution(id);
+    }
 
     return (
         <div>
@@ -170,7 +232,7 @@ const OrderBatch:FC<Props> = ({
                         <button
                             className="container flex justify-center px-4 py-2 rounded-md text-backgroundPage transition-colors duration-200 ease-in-out
                         bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            onClick={() => isRunning ? pauseTimer() : startTimer() }
+                            onClick={() => isRunning ? pauseTimer() : resumeTimer() }
                         >
                             {isRunning ?
                                 <div className="flex">
@@ -195,7 +257,7 @@ const OrderBatch:FC<Props> = ({
                         <SolutionsList
                             currentBatch={batch}
                             selectedSolutionId={selectedSolutionId}
-                            handleSelectSolution={handleSelectSolution}
+                            handleSelectSolution={handleSelectSolutionWithPause}
                         />
                     </div>
                 </>
