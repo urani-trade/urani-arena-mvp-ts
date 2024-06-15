@@ -16,7 +16,7 @@ interface IUniqueArray {
 export const SolutionItem:FC<Props> = ({solution, index, isSelected, onSelect}) => {
 
     const handleClick = () => {
-        onSelect(solution.agent.name.replace(/\s/g,''));
+        onSelect(solution.agent.name.replace(/\s/g,'-'));
     };
     const [uniqueVenues, setUniqueVenues] = useState<IUniqueArray[]>([]);
 

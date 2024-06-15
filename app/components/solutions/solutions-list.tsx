@@ -28,7 +28,7 @@ export const SolutionsList:FC<Props> = ({currentBatch, selectedSolutionId, handl
                             key={solution.agent.name}
                             solution={solution}
                             index={index}
-                            isSelected={solution.agent.name.replace(/\s/g,'') === selectedSolutionId}
+                            isSelected={solution.agent.name.replace(/\s/g,'-') === selectedSolutionId}
                             onSelect={handleSelectSolution}
                         />
                     </motion.div>
