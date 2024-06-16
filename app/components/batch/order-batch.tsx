@@ -12,7 +12,7 @@ interface Props {
     batch: IBatch;
     selectedSolutionId: string;
     onSolutionSelected: (id: string) => void;
-    fetchBatchId: (id: string) => void;
+    onBatchRequested: (id: string) => void;
     liveStream:boolean;
     setLiveStream: (stream: boolean) => void;
 }
@@ -23,7 +23,7 @@ const OrderBatch:FC<Props> = ({
   selectedSolutionId,
   liveStream,
   setLiveStream,
-  fetchBatchId,
+  onBatchRequested: fetchBatchId,
 }) => {
 
     const [isRunning, setIsRunning] = useState<boolean>(false);
@@ -66,11 +66,11 @@ const OrderBatch:FC<Props> = ({
         };
     }, [isRunning, batch]);
 
-    useEffect(() => {
-        if (batch) {
-            startTimer();
-        }
-    }, [batch]);
+    // useEffect(() => {
+    //     if (batch) {
+    //         startTimer();
+    //     }
+    // }, [batch]);
 
     useEffect(() => {
         return () => {
@@ -138,7 +138,7 @@ const OrderBatch:FC<Props> = ({
             const prevBatchId = (batch.batchId - 1).toString();
             fetchBatchId(prevBatchId);
             resetTimer(); // Reset the timer when switching batches manually
-            startTimer();
+            // startTimer();
         }
     };
 
@@ -147,7 +147,7 @@ const OrderBatch:FC<Props> = ({
             const nextBatchId = (batch.batchId + 1).toString();
             fetchBatchId(nextBatchId);
             resetTimer(); // Reset the timer when switching batches manually
-            startTimer();
+            // startTimer();
         }
     };
     const debouncedHandleChangeBatchId = useRef(debounce(fetchBatchId, 600)).current;
@@ -159,7 +159,7 @@ const OrderBatch:FC<Props> = ({
         if (sanitizedValue) {
             debouncedHandleChangeBatchId(sanitizedValue);
             resetTimer(); // Reset the timer when changing batches manually
-            startTimer();
+            // startTimer();
         }
     }, [debouncedHandleChangeBatchId]);
 
@@ -223,26 +223,29 @@ const OrderBatch:FC<Props> = ({
             </div>
             {
                 batch &&
-                <>
-                    <div className="container rounded-lg mb-4">
-                        <button
-                            className="container flex justify-center px-4 py-2 rounded-md text-backgroundPage transition-colors duration-200 ease-in-out
-                        bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            onClick={() => isRunning ? pauseTimer() : resumeTimer() }
-                        >
-                            {isRunning ?
-                                <div className="flex">
-                                    <img  src="/pause.svg" className="mr-2" alt="" />
-                                    Pause
-                                </div>
-                                :
-                                <div className="flex">
-                                    <img  src="/livestream.svg" className="mr-2" alt="" />
-                                    Livestream
-                                </div>
-                            }
-                        </button>
-                    </div>
+                <>  
+                    {/* {
+                        isRunning && 
+                        <div className="container rounded-lg mb-4">
+                            <button
+                                className="container flex justify-center px-4 py-2 rounded-md text-backgroundPage transition-colors duration-200 ease-in-out
+                            bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                onClick={() => isRunning ? pauseTimer() : resumeTimer() }
+                            >
+                                {isRunning ?
+                                    <div className="flex">
+                                        <img  src="/pause.svg" className="mr-2" alt="" />
+                                        Pause
+                                    </div>
+                                    :
+                                    <div className="flex">
+                                        <img  src="/livestream.svg" className="mr-2" alt="" />
+                                        Livestream
+                                    </div>
+                                }
+                            </button>
+                        </div>
+                    } */}
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96 mb-4">
                         <div className="font-semibold text-white mb-4 text-left">Orders</div>
                         <BatchOrderList currentBatch={batch}/>

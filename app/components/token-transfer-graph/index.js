@@ -13,9 +13,11 @@ export const TokenTransferGraph = ({
 
     // TODO combine this useEffect with the one below
     useEffect(() => {
+        console.log('solutions', solutions);
+        
         if (solutions?.length > 0) {
             const solutionsGraphs = solutions.map((solution, index)=> {
-                let agentName = solution.agent.name.replace(/\s/g,'-')
+                let agentName = solution.agent.name
 
                 // Extract nodes
                 let nodes = new Set();
@@ -82,7 +84,7 @@ export const TokenTransferGraph = ({
 
         // Periodically reset alpha to maintain stability
         d3.interval(() => {
-            simulation.alpha(1).restart();
+            simulation.alpha(0.3).restart();
         }, 1000);
 
         const svg = container.append("svg")
@@ -191,45 +193,25 @@ export const TokenTransferGraph = ({
                     return `rotate(${(angle > 90 || angle < -90) ? angle + 180 : angle},${x},${y})`;
                 });
 
-            // Update hulls
-            const hulls = d3.groups(nodes, d => d.agentName).map(([agentName, nodes]) => {
-                const points = nodes.map(node => [node.x, node.y]);
-                const hull = d3.polygonHull(points);
-                return { agentName, hull };
-            });
-
-            hullPath = hullPath.data(hulls)
-                .join("path")
-                .attr("class", "hull")
-                .attr("d", d => d.hull ? d3.line()(d.hull) : null)
-                .attr("fill", "transparent")
-                .on("click", function(event, hull) {
-                    const clickedSolution = hull.agentName;
-                    onSolutionSelected(clickedSolution)
-
-                    // // Disable tangential force
-                    // simulation.force("tangential", null);
-
-                    // // Apply a strong radial force outward to non-clicked nodes
-                    // simulation.force("radialOutward", d3.forceRadial(2000, centerX, centerY)
-                    //     .strength(d => {
-                    //         console.log(d.agentName, clickedSolution)
-                    //         return d.agentName === clickedSolution ? 0 : 0.2
-                    //     }));
-
-                    // // Apply a strong radial force inward to clicked nodes
-                    // simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
-                    //     .strength(d => d.agentName === clickedSolution ? 0.5 : 0));
-
-                    // simulation.alpha(1).restart();
-
-                    // Delay the zoom to allow the graph to settle in the center
-                    // setTimeout(() => {
-                    //     svg.transition()
-                    //         .duration(750)
-                    //         .attr("viewBox", `${centerX - viewBoxWidth / 4} ${centerY - viewBoxHeight / 4} ${viewBoxWidth / 2} ${viewBoxHeight / 2}`);
-                    // }, 1000);
+            // Update hulls for solution click / selection detection
+            if (solutionGraphs.length > 1) {
+                const hulls = d3.groups(nodes, d => d.agentName).map(([agentName, nodes]) => {
+                    const points = nodes.map(node => [node.x, node.y]);
+                    const hull = d3.polygonHull(points);
+                    return { agentName, hull };
                 });
+    
+                hullPath = hullPath.data(hulls)
+                    .join("path")
+                    .attr("class", "hull")
+                    .attr("d", d => d.hull ? d3.line()(d.hull) : null)
+                    .attr("fill", "transparent")
+                    .on("click", function(event, hull) {
+                        const clickedSolution = hull.agentName;
+                        onSolutionSelected(clickedSolution)
+                    });
+            }
+            
         }
 
         function dragstarted(event, d) {
@@ -274,7 +256,11 @@ export const TokenTransferGraph = ({
         window.addEventListener("resize", resize);
         resize();
 
-        for (let i = 0; i < 600; ++i) simulation.tick();
+        // Un-tangle the graph with a charge blast
+        simulation.force("charge", d3.forceManyBody().strength(-9000))
+        for (let i = 0; i < 500; ++i) simulation.tick();
+        simulation.force("charge", d3.forceManyBody().strength(-2000))
+        // for (let i = 0; i < 500; ++i) simulation.tick();
 
         return () => {
             window.removeEventListener("resize", resize);
@@ -361,23 +347,6 @@ export const TokenTransferGraph = ({
     }
 
     return (
-        <div className='relative'>
-            {/* {
-                oneSolutionView &&
-                <button className="absolute left-0 top-0 flex items-center py-2 px-3 rounded-md transition-colors duration-200 ease-in-out
-                    bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2"
-                    onClick={goBackToAllSolutionView}
-                >
-                    <img  src="/back-arrow.svg" className="mr-3" alt="" />
-                    <p
-                        className="text-backgroundPage"
-                    >
-                        Back
-                    </p>
-                </button>
-            } */}
-            <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px]"></div>
-        </div>
-
+        <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px]"></div>
     );
 };
