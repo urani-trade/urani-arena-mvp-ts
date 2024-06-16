@@ -79,14 +79,13 @@ export default function Arena() {
           <OrderBatch
             onBatchRequested={onBatchRequested}
             batch={batchData as IBatch}
-            tokenMetadata={tokenMetadata}
+            tokenMetadata={tokenMetadata!}
             selectedSolutionId={selectedSolutionId as string}
             onSolutionSelected={onSolutionSelected}
             liveStream={liveStream}
             setLiveStream={setLiveStream}
           />
         }
-
       </div>
     </div>
   );

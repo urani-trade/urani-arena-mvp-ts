@@ -12,7 +12,7 @@ export interface ITokenMetadata {
         name: string;
         symbol: string;
         icon: string;
-        decimals: string;
+        decimals: number;
         address: number;
     }
 }
