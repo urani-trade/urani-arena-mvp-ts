@@ -68,8 +68,14 @@ export function TokenTransferGraph ({
         const { width, height } = container.node().getBoundingClientRect();
         
         // Define the width and height for the SVG's viewBox
-        const viewBoxWidth = 1000;
-        const viewBoxHeight = 1000;
+
+        let viewBoxWidth = 1000;
+        let viewBoxHeight = 1000;
+
+        if (solutions.length <= 1) {
+            viewBoxWidth = Math.floor(viewBoxWidth / 2);
+            viewBoxHeight = Math.floor(viewBoxHeight / 2);
+        }
 
         const centerX = viewBoxWidth / 2;
         const centerY = viewBoxHeight / 2;
@@ -280,6 +286,6 @@ export function TokenTransferGraph ({
     }
 
     return (
-        <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px]"></div>
+        <div ref={renderContainerRef} className="w-full pt-10 pb-10 h-[400px] md:h-[700px]"></div>
     );
 };
