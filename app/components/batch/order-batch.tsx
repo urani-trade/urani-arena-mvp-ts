@@ -11,23 +11,19 @@ const TIME_AUTO_CHANGE: number = 4000; // 4000 for develop and testing ( 40000 f
 interface Props {
     batch: IBatch;
     selectedSolutionId: string;
-    handleSelectSolution: (id: string) => void;
+    onSolutionSelected: (id: string) => void;
     fetchBatchId: (id: string) => void;
     liveStream:boolean;
     setLiveStream: (stream: boolean) => void;
-    setOneSolutionView: (solutionView: boolean) => void;
-    oneSolutionView: boolean;
 }
 
 const OrderBatch:FC<Props> = ({
   batch,
-  handleSelectSolution,
+  onSolutionSelected: handleSelectSolution,
   selectedSolutionId,
   liveStream,
   setLiveStream,
   fetchBatchId,
-  setOneSolutionView,
-  oneSolutionView
 }) => {
 
     const [isRunning, setIsRunning] = useState<boolean>(false);

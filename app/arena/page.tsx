@@ -10,32 +10,31 @@ import * as process from "process";
 
 export default function Arena() {
 
-    const [batchData, setBatchData] = useState<IBatch | null>(null);
+  const [selectedBatchId, setSelectedBatchId] = useState<string>('1');
+  const [batchData, setBatchData] = useState<IBatch | null>(null);
 
-    const [liveStream,setLiveStream] = useState<boolean>(true);
+  const [liveStream,setLiveStream] = useState<boolean>(true);
 
-    const [selectedSolutionId, setSelectedSolutionId] = useState<string>('');
-    const [selectedBatchId, setSelectedBatchId] = useState<string>('1');
+  const [selectedSolutionId, setSelectedSolutionId] = useState<string>('');
 
-    const [oneSolutionView,setOneSolutionView] = useState<boolean>(false);
+  const fetchBatch = async (id:string) => {
+      try {
+        const response = await axios.get(
+          `http://ec2-18-118-1-69.us-east-2.compute.amazonaws.com/api/batches/${id}`
+        );
+        setBatchData(response.data);
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  };
 
-    const fetchData = async (id:string) => {
-        try {
-            const response = await axios.get(
-                `http://ec2-18-118-1-69.us-east-2.compute.amazonaws.com/api/batches/${id}`);
-            setBatchData(response.data);
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
+  useEffect(() => {
+        fetchBatch(selectedBatchId);
+  }, [selectedBatchId]);
 
-    useEffect(() => {
-         fetchData(selectedBatchId);
-    }, [selectedBatchId]);
-
-    const fetchBatchId = (id:string) => {
-        setSelectedBatchId(id);
-    }
+  const fetchBatchId = (id:string) => {
+      setSelectedBatchId(id);
+  }
 
 
   return (
@@ -43,10 +42,7 @@ export default function Arena() {
       <div className="w-full w-8/10 order-2 md:order-1">
         <TokenTransferGraph
             solutions={batchData?.solutions}
-            setSelectedSolutionId={setSelectedSolutionId}
-            selectedSolutionId={selectedSolutionId}
-            liveStream={liveStream}
-            setLiveStream={setLiveStream}
+            onSolutionSelected={setSelectedSolutionId}
         />
       </div>
       <div className="w-2/10 order-1 md:order-2 flex items-start  md:justify-end text-center md:text-left lg:ml-20">
@@ -55,12 +51,10 @@ export default function Arena() {
               <OrderBatch
                   batch={batchData as IBatch}
                   selectedSolutionId={selectedSolutionId as string}
-                  handleSelectSolution={setSelectedSolutionId}
+                  onSolutionSelected={setSelectedSolutionId}
                   liveStream={liveStream}
                   setLiveStream={setLiveStream}
                   fetchBatchId={fetchBatchId}
-                  setOneSolutionView={setOneSolutionView}
-                  oneSolutionView={oneSolutionView}
               />
           }
 
