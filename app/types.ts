@@ -7,6 +7,16 @@ export interface Order {
     orderId: string;
 }
 
+export interface ITokenMetadata {
+    [key: string]: {
+        name: string;
+        symbol: string;
+        icon: string;
+        decimals: string;
+        address: number;
+    }
+}
+
 export interface Batch {
     batchTime: string;
     batchNumber: number;

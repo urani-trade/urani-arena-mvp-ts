@@ -3,13 +3,14 @@
 import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {BatchOrderList} from "@/components/batch/batch-order-list";
 import {SolutionsList} from "@/components/solutions/solutions-list";
-import {IBatch} from "@/types";
+import {IBatch, ITokenMetadata} from "@/types";
 import {debounce} from "@/utils/utils";
 
 const TIME_AUTO_CHANGE: number = 4000; // 4000 for develop and testing ( 40000 for prod)
 
 interface Props {
     batch: IBatch;
+    tokenMetadata: ITokenMetadata;
     selectedSolutionId: string;
     onSolutionSelected: (id: string) => void;
     onBatchRequested: (id: string) => void;
@@ -19,6 +20,7 @@ interface Props {
 
 const OrderBatch:FC<Props> = ({
   batch,
+  tokenMetadata,
   onSolutionSelected: handleSelectSolution,
   selectedSolutionId,
   liveStream,
@@ -248,7 +250,7 @@ const OrderBatch:FC<Props> = ({
                     } */}
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96 mb-4">
                         <div className="font-semibold text-white mb-4 text-left">Orders</div>
-                        <BatchOrderList currentBatch={batch}/>
+                        <BatchOrderList currentBatch={batch} tokenMetadata={tokenMetadata}/>
                     </div>
 
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96">

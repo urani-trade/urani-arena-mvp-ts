@@ -5,7 +5,7 @@ import { TokenTransferGraph } from '@/components/token-transfer-graph'
 import {useEffect, useState, useCallback, useMemo} from "react";
 import axios from "axios";
 import {log} from "next/dist/server/typescript/utils";
-import {IBatch, ISolution} from "@/types";
+import {IBatch, ISolution, ITokenMetadata} from "@/types";
 import * as process from "process";
 
 export default function Arena() {
@@ -14,6 +14,7 @@ export default function Arena() {
   const [selectedBatchId, setSelectedBatchId] = useState<string>('1');
   const [batchData, setBatchData] = useState<IBatch | null>(null);
   const [liveStream,setLiveStream] = useState<boolean>(true);
+  const [tokenMetadata, setTokenMetadata] = useState<ITokenMetadata | null>(null);
   
 
   useEffect(() => {
@@ -26,13 +27,15 @@ export default function Arena() {
         `http://ec2-18-118-1-69.us-east-2.compute.amazonaws.com/api/batches/${id}`
       );
       setBatchData(response.data);
+      setTokenMetadata(response.data.tokenMetadata);
+      console.log('Batch Data:', response.data);
+      console.log('Token Metadata:', response.data.tokenMetadata);
     } 
     catch (error) {
       console.error('Error:', error);
     }
   };
 
-  
   const onSolutionSelected = useCallback((id: string) => {
     console.log('onSolutionSelected', id);
     setLiveStream(false);
@@ -60,9 +63,7 @@ export default function Arena() {
             onClick={setSelectedSolutionId.bind(null, '')}
           >
             <img src="/back-arrow.svg" className="mr-3" alt="" />
-            <p
-              className="text-backgroundPage"
-            >
+            <p className="text-backgroundPage">
               Show All Solutions
             </p>
           </button>
@@ -78,6 +79,7 @@ export default function Arena() {
           <OrderBatch
             onBatchRequested={onBatchRequested}
             batch={batchData as IBatch}
+            tokenMetadata={tokenMetadata}
             selectedSolutionId={selectedSolutionId as string}
             onSolutionSelected={onSolutionSelected}
             liveStream={liveStream}
