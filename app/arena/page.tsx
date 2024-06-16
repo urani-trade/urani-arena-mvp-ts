@@ -74,7 +74,7 @@ export default function Arena() {
           onSolutionSelected={onSolutionSelected}
         />
       </div>
-      <div className="w-2/10 order-1 md:order-2 flex items-start  md:justify-end text-center md:text-left lg:ml-20">
+      <div className="w-2/10 order-1 md:order-2 flex items-center  md:justify-end text-center md:text-left lg:ml-20">
         {
           batchData &&
           <OrderBatch
