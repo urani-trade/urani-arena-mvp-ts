@@ -12,7 +12,6 @@ export function TokenTransferGraph ({
     const [solutionGraphs, setSolutionGraphs] = useState(null);
     const renderContainerRef = useRef(null);
 
-    // TODO combine this useEffect with the one below
     useEffect(() => {        
         if (solutions?.length > 0) {
             const solutionsGraphs = solutions.map((solution, index)=> {
@@ -24,13 +23,17 @@ export function TokenTransferGraph ({
                     nodes.add(routeStep.srcName);
                     nodes.add(routeStep.dstName);
                 });
-                nodes = Array.from(nodes).map(name => ({
-                    id: `${agentName}-${name}`,
-                    name, 
-                    agentName,
-                    solutionIndex: index
-                    // TODO add address and other metadata
-                }));
+                nodes = Array.from(nodes).map(name => {
+                    const routeStep = solution.route.find(step => step.srcName === name || step.dstName === name);
+                    const imageUrl = routeStep ? (routeStep.srcName === name ? routeStep.srcImage : routeStep.dstImage) : '';
+                    return {
+                        id: `${agentName}-${name}`,
+                        name, 
+                        agentName,
+                        imageUrl,
+                        solutionIndex: index
+                    };
+                });
                 
                 // Extract links
                 let links = solution.route.map(routeStep => {
@@ -140,23 +143,19 @@ export function TokenTransferGraph ({
                 .on("drag", dragged)
                 .on("end", dragended));
 
-        // Add the wide outlined rectangles for the nodes
-        node.append("rect")
-            .attr("width", 60)
-            .attr("height", 20)
-            .attr("x", -30)
-            .attr("y", -10)
-            .attr("fill", "transparent")
-            .attr("stroke", "white");
+        // Add the circle icons with images for the nodes
+        // node.append("circle")
+        //     .attr("r", 30)
+        //     .attr("fill", "transparent")
+        //     .attr("stroke", "transparent");
 
-        // Add the text
-        node.append("text")
-            .attr("x", -25)
-            .attr("dy", ".35em")
-            .style("fill", "white")
-            .text(d => `${d.name.substring(0, 6)}...`);
+        node.append("image")
+            .attr("xlink:href", d => d.imageUrl)
+            .attr("x", -15)
+            .attr("y", -15)
+            .attr("width", 30)
+            .attr("height", 30);
 
-        // Initialize the hull paths
         let hullPath = g.selectAll(".hull");
 
         function tick() {
