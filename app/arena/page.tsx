@@ -70,6 +70,7 @@ export default function Arena() {
         }
         <TokenTransferGraph
           solutions={filteredSolutions}
+          tokenMetadata={tokenMetadata!}
           onSolutionSelected={onSolutionSelected}
         />
       </div>

@@ -1,21 +1,19 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import PropTypes from 'prop-types';
 import * as d3 from 'd3';
 import './index.css';
 
-export function TokenTransferGraph (
+export function TokenTransferGraph ({
    solutions,
    onSolutionSelected,
-) {
+   tokenMetadata
+}) {
     const [solutionGraphs, setSolutionGraphs] = useState(null);
     const renderContainerRef = useRef(null);
 
     // TODO combine this useEffect with the one below
-    useEffect(() => {
-        console.log('solutions', solutions);
-        
+    useEffect(() => {        
         if (solutions?.length > 0) {
             const solutionsGraphs = solutions.map((solution, index)=> {
                 let agentName = solution.agent.name
@@ -35,12 +33,14 @@ export function TokenTransferGraph (
                 }));
                 
                 // Extract links
-                let links = solution.route.map(routeStep => ({
-                    source: `${agentName}-${routeStep.srcName}`,
-                    target: `${agentName}-${routeStep.dstName}`,
-                    // TODO use token metadata
-                    value: routeStep.sentToken.substring(0, 3).toUpperCase()
-                }));
+                let links = solution.route.map(routeStep => {
+                    let formattedAmount = (routeStep.sentAmount / Math.pow(10, tokenMetadata[routeStep.sentToken].decimals)).toFixed(tokenMetadata[routeStep.sentToken].decimals)
+                    return {
+                        source: `${agentName}-${routeStep.srcName}`,
+                        target: `${agentName}-${routeStep.dstName}`,
+                        value: `${formattedAmount} ${tokenMetadata[routeStep.sentToken].symbol}`
+                    }
+                });
 
                 return  {
                     agentName,

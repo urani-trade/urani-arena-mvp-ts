@@ -32,7 +32,7 @@ export interface IBatch {
     fillData: {
         agentName: string;
         tx: string;
-        route: IRoute[];
+        route: IRouteStep[];
     }
 }
 
@@ -48,7 +48,7 @@ export interface IOrder {
     status: string;
 }
 
-export interface IRoute {
+export interface IRouteStep {
     dstAddress: string;
     dstImage: string;
     dstName: string;
@@ -64,7 +64,7 @@ export interface ISolution {
         image: string;
         name: string;
     }
-    route: IRoute[];
+    route: IRouteStep[];
     score: number;
 }
 
