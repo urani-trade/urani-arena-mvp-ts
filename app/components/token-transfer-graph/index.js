@@ -2,20 +2,21 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
+import confetti from 'canvas-confetti';
 import './index.css';
 
-export function TokenTransferGraph ({
-   solutions,
-   onSolutionSelected,
-   tokenMetadata
+export function TokenTransferGraph({
+    solutions,
+    onSolutionSelected,
+    tokenMetadata
 }) {
     const [solutionGraphs, setSolutionGraphs] = useState(null);
     const renderContainerRef = useRef(null);
 
-    useEffect(() => {        
+    useEffect(() => {
         if (solutions?.length > 0) {
-            const solutionsGraphs = solutions.map((solution, index)=> {
-                let agentName = solution.agent.name
+            const solutionsGraphs = solutions.map((solution, index) => {
+                let agentName = solution.agent.name;
 
                 // Extract nodes
                 let nodes = new Set();
@@ -28,33 +29,34 @@ export function TokenTransferGraph ({
                     const imageUrl = routeStep ? (routeStep.srcName === name ? routeStep.srcImage : routeStep.dstImage) : '';
                     return {
                         id: `${agentName}-${name}`,
-                        name, 
+                        name,
                         agentName,
                         imageUrl,
                         solutionIndex: index
                     };
                 });
-                
+
                 // Extract links
                 let links = solution.route.map(routeStep => {
-                    let formattedAmount = (routeStep.sentAmount / Math.pow(10, tokenMetadata[routeStep.sentToken].decimals)).toFixed(tokenMetadata[routeStep.sentToken].decimals)
+                    let formattedAmount = (routeStep.sentAmount / Math.pow(10, tokenMetadata[routeStep.sentToken].decimals)).toFixed(tokenMetadata[routeStep.sentToken].decimals);
                     return {
                         source: `${agentName}-${routeStep.srcName}`,
                         target: `${agentName}-${routeStep.dstName}`,
-                        value: `${formattedAmount} ${tokenMetadata[routeStep.sentToken].symbol}`
-                    }
+                        value: `${formattedAmount} ${tokenMetadata[routeStep.sentToken].symbol}`,
+                        confettiLaunched: false
+                    };
                 });
 
-                return  {
+                return {
                     agentName,
                     nodes,
                     links
-                }
+                };
             });
 
             setSolutionGraphs(solutionsGraphs);
         }
-    }, [solutions]);
+    }, [solutions, tokenMetadata]);
 
     useEffect(() => {
         if (!solutionGraphs) return;
@@ -66,9 +68,8 @@ export function TokenTransferGraph ({
         container.select("svg").remove(); // Remove existing SVG to avoid duplicates
 
         const { width, height } = container.node().getBoundingClientRect();
-        
-        // Define the width and height for the SVG's viewBox
 
+        // Define the width and height for the SVG's viewBox
         let viewBoxWidth = 1000;
         let viewBoxHeight = 1000;
 
@@ -89,7 +90,7 @@ export function TokenTransferGraph ({
             .on("tick", tick);
 
         if (solutionGraphs.length > 1) {
-            simulation.force("tangential", tangentialForce(2, centerX, centerY))
+            simulation.force("tangential", tangentialForce(2, centerX, centerY));
         }
 
         // Periodically reset alpha to maintain stability
@@ -150,11 +151,6 @@ export function TokenTransferGraph ({
                 .on("end", dragended));
 
         // Add the circle icons with images for the nodes
-        // node.append("circle")
-        //     .attr("r", 30)
-        //     .attr("fill", "transparent")
-        //     .attr("stroke", "transparent");
-
         node.append("image")
             .attr("xlink:href", d => d.imageUrl)
             .attr("x", -15)
@@ -206,18 +202,51 @@ export function TokenTransferGraph ({
                     const hull = d3.polygonHull(points);
                     return { agentName, hull };
                 });
-    
+
                 hullPath = hullPath.data(hulls)
                     .join("path")
                     .attr("class", "hull")
                     .attr("d", d => d.hull ? d3.line()(d.hull) : null)
                     .attr("fill", "transparent")
-                    .on("click", function(event, hull) {
+                    .on("click", function (event, hull) {
                         const clickedSolution = hull.agentName;
-                        onSolutionSelected(clickedSolution)
+                        onSolutionSelected(clickedSolution);
                     });
             }
-            
+
+            // Confetti animation for links between "User" nodes
+            links.forEach(link => {
+                const sourceIsUser = link.source.name.includes("User");
+                const targetIsUser = link.target.name.includes("User");
+                if (sourceIsUser && targetIsUser && !link.confettiLaunched) {
+                    link.confettiLaunched = true; // Mark confetti as launched for this link
+                    const duration = 1000; // Duration of the confetti animation in milliseconds
+                    const interval = 300; // Interval between confetti bursts
+
+                    const confettiInterval = setInterval(() => {
+                        const midX = (link.source.x + link.target.x) / 2;
+                        const midY = (link.source.y + link.target.y) / 2;
+
+                        // Get the position of the SVG in the window
+                        const svgNode = svg.node();
+                        const svgRect = svgNode.getBoundingClientRect();
+
+                        // Calculate normalized coordinates for confetti
+                        const normalizedX = (svgRect.left + midX * (svgRect.width / viewBoxWidth)) / window.innerWidth;
+                        const normalizedY = (svgRect.top + midY * (svgRect.height / viewBoxHeight)) / window.innerHeight;
+
+                        confetti({
+                            particleCount: 5,
+                            startVelocity: 10,
+                            spread: 50,
+                            origin: { x: normalizedX, y: normalizedY },
+                            colors: ['#bb0000', '#ffffff']
+                        });
+                    }, interval);
+
+                    setTimeout(() => clearInterval(confettiInterval), duration);
+                }
+            });
         }
 
         function dragstarted(event, d) {
@@ -238,7 +267,7 @@ export function TokenTransferGraph ({
         }
 
         function tangentialForce(strength, cx, cy) {
-            return function() {
+            return function () {
                 nodes.forEach(d => {
                     const dx = d.x - cx;
                     const dy = d.y - cy;
@@ -263,9 +292,9 @@ export function TokenTransferGraph ({
         resize();
 
         // Un-tangle the graph with a charge blast
-        simulation.force("charge", d3.forceManyBody().strength(-9000))
+        simulation.force("charge", d3.forceManyBody().strength(-9000));
         for (let i = 0; i < 500; ++i) simulation.tick();
-        simulation.force("charge", d3.forceManyBody().strength(-2000))
+        simulation.force("charge", d3.forceManyBody().strength(-2000));
         // for (let i = 0; i < 500; ++i) simulation.tick();
 
         return () => {
@@ -283,9 +312,9 @@ export function TokenTransferGraph ({
             dx: perpendicularX,
             dy: perpendicularY
         };
-    }
+    };
 
     return (
         <div ref={renderContainerRef} className="w-full pt-10 pb-10 h-[400px] md:h-[700px]"></div>
     );
-};
+}
