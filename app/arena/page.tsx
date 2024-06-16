@@ -2,7 +2,7 @@
 
 import OrderBatch from '@/components/batch/order-batch'
 import { TokenTransferGraph } from '@/components/token-transfer-graph'
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback, useMemo} from "react";
 import axios from "axios";
 import {log} from "next/dist/server/typescript/utils";
 import {IBatch, ISolution} from "@/types";
@@ -33,17 +33,22 @@ export default function Arena() {
   };
 
   
-  function onSolutionSelected (id:string) {
+  const onSolutionSelected = useCallback((id: string) => {
     console.log('onSolutionSelected', id);
     setLiveStream(false);
     setSelectedSolutionId(id);
-  }
+  }, []);
 
-  function onBatchRequested (id:string) {
+  const onBatchRequested = useCallback((id: string) => {
     console.log('onBatchRequested', id);
     setSelectedSolutionId('');
     setSelectedBatchId(id);
-  }
+  }, []);
+
+  // Use useMemo to memoize the filtered solutions
+  const filteredSolutions = useMemo(() => {
+    return batchData?.solutions.filter(solution => solution.agent.name === selectedSolutionId || !selectedSolutionId);
+  }, [batchData, selectedSolutionId]);
 
   return (
     <div className="flex flex-col md:flex-row justify-center">
@@ -63,7 +68,7 @@ export default function Arena() {
           </button>
         }
         <TokenTransferGraph
-          solutions={batchData?.solutions.filter(solution => solution.agent.name === selectedSolutionId || !selectedSolutionId)}
+          solutions={filteredSolutions}
           onSolutionSelected={onSolutionSelected}
         />
       </div>

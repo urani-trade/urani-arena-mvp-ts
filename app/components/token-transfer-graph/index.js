@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './index.css';
 
-export const TokenTransferGraph = ({
+export const TokenTransferGraph = React.memo(({
    solutions,
    onSolutionSelected,
 }) => {
@@ -349,4 +349,4 @@ export const TokenTransferGraph = ({
     return (
         <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px]"></div>
     );
-};
+});
