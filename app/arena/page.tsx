@@ -58,7 +58,7 @@ export default function Arena() {
       <div className="relative w-full w-8/10 order-2 md:order-1">
         {
           selectedSolutionId &&
-          <button className="z-0 absolute left-[25px] top-[16px] flex items-center py-2 px-3 rounded-md transition-colors duration-200 ease-in-out
+          <button className="z-10 absolute left-[25px] top-[16px] flex items-center py-2 px-3 rounded-md transition-colors duration-200 ease-in-out
             bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2"
             onClick={setSelectedSolutionId.bind(null, '')}
           >
