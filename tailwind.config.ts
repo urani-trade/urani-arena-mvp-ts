@@ -28,6 +28,11 @@ const config: Config = {
         brandBorderDisabled: '#5A4E8E',
         arrowDisabled: '#9B95B3',
         leaderCard: '#C4C6F9'
+      },
+      height: {
+        '1/2-vh': '50vh',
+        '1/3-vh': '66vh',
+        '3/4-vh': '75vh',
       }
     },
   },

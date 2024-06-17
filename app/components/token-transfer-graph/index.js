@@ -326,7 +326,7 @@ export function TokenTransferGraph({
     };
 
     return (
-        <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px] relative">
+        <div ref={renderContainerRef} className="w-full h-full relative">
             {Array.from({ length: 10 }).map((_, i) => (
                 <div
                     key={i}

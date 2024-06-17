@@ -12,7 +12,7 @@ import Footer from '@/components/footer'
 import { SparklesIcon } from '@heroicons/react/20/solid'
 
 const navItems = [
-  { label: 'Live Arena', url: '/arena' },
+  { label: 'Live Arena', url: '/' },
   { label: 'Leaderboard', url: '/leaderboard' },
   { label: 'Stats', url: '/stats' },
 ]
