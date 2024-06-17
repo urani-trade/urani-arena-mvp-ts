@@ -23,8 +23,13 @@ export default function Arena() {
 
   async function fetchBatch (id:string) {
     try {
+      let orderbookUrl = process.env.NEXT_PUBLIC_ORDERBOOK_URL;
+      if (!orderbookUrl) {
+        throw new Error('NEXT_PUBLIC_ORDERBOOK_URL is not defined');
+      }
+
       const response = await axios.get(
-        `http://ec2-3-136-233-154.us-east-2.compute.amazonaws.com/api/batches/${id}`
+        `${orderbookUrl}/api/batches/${id}`
       );
       setBatchData(response.data);
       setTokenMetadata(response.data.tokenMetadata);
