@@ -26,7 +26,8 @@ const config: Config = {
         hoverWhite: '#D7D5E1',
         brandDisabled: '#4A3D84',
         brandBorderDisabled: '#5A4E8E',
-        arrowDisabled: '#9B95B3'
+        arrowDisabled: '#9B95B3',
+        leaderCard: '#C4C6F9'
       }
     },
   },
