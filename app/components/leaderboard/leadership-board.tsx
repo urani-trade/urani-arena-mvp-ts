@@ -39,7 +39,7 @@ export const LeaderShipBoard:FC = () => {
                 if (a[sortKey] > b[sortKey]) return 1 * order;
                 return 0;
             })
-    },[leaderData]);
+    },[leaderData, sortKey, sortOrder]);
 
     const handleSort = (key: LeaderBoardColumns) => {
         if (sortKey === key) {

@@ -15,7 +15,7 @@ export default function Arena() {
   const [batchData, setBatchData] = useState<IBatch | null>(null);
   const [liveStream,setLiveStream] = useState<boolean>(true);
   const [tokenMetadata, setTokenMetadata] = useState<ITokenMetadata | null>(null);
-  
+
 
   useEffect(() => {
     fetchBatch(selectedBatchId);
@@ -24,13 +24,13 @@ export default function Arena() {
   async function fetchBatch (id:string) {
     try {
       const response = await axios.get(
-        `http://ec2-18-118-1-69.us-east-2.compute.amazonaws.com/api/batches/${id}`
+        `http://ec2-3-136-233-154.us-east-2.compute.amazonaws.com/api/batches/${id}`
       );
       setBatchData(response.data);
       setTokenMetadata(response.data.tokenMetadata);
       console.log('Batch Data:', response.data);
       console.log('Token Metadata:', response.data.tokenMetadata);
-    } 
+    }
     catch (error) {
       console.error('Error:', error);
     }
