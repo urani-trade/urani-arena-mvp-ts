@@ -1,98 +1,72 @@
-"use client";  // Ensure this component is treated as a Client Component
+"use client";
 
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './index.css';
 
-export const TokenTransferGraph = () => {
-    const [graphData, setGraphData] = useState(null);
-    const graphRef = useRef(null);
+export function TokenTransferGraph ({
+   solutions,
+   onSolutionSelected,
+   tokenMetadata
+}) {
+    const [solutionGraphs, setSolutionGraphs] = useState(null);
+    const renderContainerRef = useRef(null);
 
-    useEffect(() => {
-        const data = [
-            {
-                name: "Solution 1",
-                nodes: ["Harry", "Mario", "Sarah", "Alice", "Eveie", "Peter", "James", "Roger"],
-                links: [
-                    { source: "Harry", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "Alice", value: "SOL" },
-                    { source: "Eveie", destination: "Alice", value: "SOL" },
-                    { source: "Peter", destination: "Alice", value: "SOL" },
-                    { source: "Mario", destination: "Alice", value: "SOL" },
-                    { source: "James", destination: "Alice", value: "SOL" },
-                    { source: "Alice", destination: "Mario", value: "SOL" },
-                    { source: "Sarah", destination: "James", value: "SOL" },
-                    { source: "Roger", destination: "James", value: "SOL" },
-                    { source: "James", destination: "Roger", value: "SOL" },
-                    { source: "Alice", destination: "Peter", value: "SOL" },
-                    { source: "Alice", destination: "Eveie", value: "SOL" },
-                    { source: "Harry", destination: "Eveie", value: "SOL" },
-                    { source: "Eveie", destination: "Harry", value: "SOL" },
-                    { source: "James", destination: "Sarah", value: "SOL" },
-                    { source: "Alice", destination: "Sarah", value: "SOL" }
-                ]
-            },
-            {
-                name: "Solution 2",
-                nodes: ["0xRekt", "0xBeef", "0xDead"],
-                links: [
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" },
-                    { source: "0xBeef", destination: "0xRekt", value: "ETH" },
-                    { source: "0xBeef", destination: "0xDead", value: "ETH" },
-                    { source: "0xDead", destination: "0xRekt", value: "ETH" },
-                    { source: "0xRekt", destination: "0xBeef", value: "ETH" }
-                ]
-            },
-            {
-                name: "Solution 3",
-                nodes: ["Jake", "Bob", "Charlie", "Dave"],
-                links: [
-                    { source: "Jake", destination: "Bob", value: "BTC" },
-                    { source: "Bob", destination: "Charlie", value: "BTC" },
-                    { source: "Charlie", destination: "Dave", value: "BTC" },
-                    { source: "Dave", destination: "Jake", value: "BTC" }
-                ]
-            },
-            {
-                name: "Solution 4",
-                nodes: ["X", "Y", "Z"],
-                links: [
-                    { source: "X", destination: "Y", value: "LTC" },
-                    { source: "Y", destination: "Z", value: "LTC" },
-                    { source: "Z", destination: "X", value: "LTC" },
-                    { source: "X", destination: "Z", value: "LTC" }
-                ]
-            }
-        ];
+    useEffect(() => {        
+        if (solutions?.length > 0) {
+            const solutionsGraphs = solutions.map((solution, index)=> {
+                let agentName = solution.agent.name
 
-        setGraphData(data);
-    }, []);
+                // Extract nodes
+                let nodes = new Set();
+                solution.route.forEach(routeStep => {
+                    nodes.add(routeStep.srcName);
+                    nodes.add(routeStep.dstName);
+                });
+                nodes = Array.from(nodes).map(name => {
+                    const routeStep = solution.route.find(step => step.srcName === name || step.dstName === name);
+                    const imageUrl = routeStep ? (routeStep.srcName === name ? routeStep.srcImage : routeStep.dstImage) : '';
+                    return {
+                        id: `${agentName}-${name}`,
+                        name, 
+                        agentName,
+                        imageUrl,
+                        solutionIndex: index
+                    };
+                });
+                
+                // Extract links
+                let links = solution.route.map(routeStep => {
+                    let formattedAmount = (routeStep.sentAmount / Math.pow(10, tokenMetadata[routeStep.sentToken].decimals)).toFixed(tokenMetadata[routeStep.sentToken].decimals)
+                    return {
+                        source: `${agentName}-${routeStep.srcName}`,
+                        target: `${agentName}-${routeStep.dstName}`,
+                        value: `${formattedAmount} ${tokenMetadata[routeStep.sentToken].symbol}`
+                    }
+                });
 
-    useEffect(() => {
-        if (!graphData) return;
-
-        // Flatten the nodes and links arrays for D3
-        const nodes = [];
-        const links = [];
-        const nodeMap = new Map();
-
-        graphData.forEach(graph => {
-            graph.nodes.forEach(nodeName => {
-                if (!nodeMap.has(nodeName)) {
-                    const node = { name: nodeName, graph: graph.name };
-                    nodes.push(node);
-                    nodeMap.set(nodeName, node);
+                return  {
+                    agentName,
+                    nodes,
+                    links
                 }
             });
-            graph.links.forEach(link => {
-                links.push({ source: nodeMap.get(link.source), target: nodeMap.get(link.destination), value: link.value, graph: graph.name });
-            });
-        });
 
-        const container = d3.select(graphRef.current);
-        container.select("svg").remove(); // Remove any existing SVG to avoid duplicates
+            setSolutionGraphs(solutionsGraphs);
+        }
+    }, [solutions]);
+
+    useEffect(() => {
+        if (!solutionGraphs) return;
+
+        let nodes = Array.from(new Set(solutionGraphs.map(graph => graph.nodes).flat()));
+        let links = solutionGraphs.map(graph => graph.links).flat();
+
+        const container = d3.select(renderContainerRef.current);
+        container.select("svg").remove(); // Remove existing SVG to avoid duplicates
+
         const { width, height } = container.node().getBoundingClientRect();
-
+        
         // Define the width and height for the SVG's viewBox
         const viewBoxWidth = 1000;
         const viewBoxHeight = 1000;
@@ -101,13 +75,16 @@ export const TokenTransferGraph = () => {
         const centerY = viewBoxHeight / 2;
 
         const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id(d => d.name).distance(160))
+            .force("link", d3.forceLink(links).id(d => d.id).distance(160))
             .force("charge", d3.forceManyBody().strength(-2000))
             .force("center", d3.forceCenter(centerX, centerY))
             .force("gravity", d3.forceRadial(0.5, centerX, centerY))
-            .force("tangential", tangentialForce(2, centerX, centerY))
             .alphaDecay(0)
             .on("tick", tick);
+
+        if (solutionGraphs.length > 1) {
+            simulation.force("tangential", tangentialForce(2, centerX, centerY))
+        }
 
         // Periodically reset alpha to maintain stability
         d3.interval(() => {
@@ -166,23 +143,19 @@ export const TokenTransferGraph = () => {
                 .on("drag", dragged)
                 .on("end", dragended));
 
-        // Add the wide outlined rectangles for the nodes
-        node.append("rect")
-            .attr("width", 60)
-            .attr("height", 20)
-            .attr("x", -30)
-            .attr("y", -10)
-            .attr("fill", "transparent")
-            .attr("stroke", "white");
+        // Add the circle icons with images for the nodes
+        // node.append("circle")
+        //     .attr("r", 30)
+        //     .attr("fill", "transparent")
+        //     .attr("stroke", "transparent");
 
-        // Add the text
-        node.append("text")
-            .attr("x", -25)
-            .attr("dy", ".35em")
-            .style("fill", "white")
-            .text(d => `${d.name.substring(0, 6)}...`);
+        node.append("image")
+            .attr("xlink:href", d => d.imageUrl)
+            .attr("x", -15)
+            .attr("y", -15)
+            .attr("width", 30)
+            .attr("height", 30);
 
-        // Initialize the hull paths
         let hullPath = g.selectAll(".hull");
 
         function tick() {
@@ -220,41 +193,25 @@ export const TokenTransferGraph = () => {
                     return `rotate(${(angle > 90 || angle < -90) ? angle + 180 : angle},${x},${y})`;
                 });
 
-            // Update hulls
-            const hulls = d3.groups(nodes, d => d.graph).map(([graph, nodes]) => {
-                const points = nodes.map(node => [node.x, node.y]);
-                const hull = d3.polygonHull(points);
-                return { graph, hull };
-            });
-
-            hullPath = hullPath.data(hulls)
-                .join("path")
-                .attr("class", "hull")
-                .attr("d", d => d.hull ? d3.line()(d.hull) : null)
-                .attr("fill", "transparent")
-                .on("click", function(event, d) {
-                    const clickedGraph = d.graph;
-
-                    // Disable tangential force
-                    simulation.force("tangential", null);
-
-                    // Apply a strong radial force outward to non-clicked nodes
-                    simulation.force("radialOutward", d3.forceRadial(1000, centerX, centerY)
-                        .strength(d => d.graph === clickedGraph ? 0 : 0.01));
-
-                    // Apply a strong radial force inward to clicked nodes
-                    simulation.force("gravity", d3.forceRadial(0, centerX, centerY)
-                        .strength(d => d.graph === clickedGraph ? 0.2 : 0));
-
-                    simulation.alpha(1).restart();
-
-                    // Delay the zoom to allow the graph to settle in the center
-                    setTimeout(() => {
-                        svg.transition()
-                            .duration(750)
-                            .attr("viewBox", `${centerX - viewBoxWidth / 4} ${centerY - viewBoxHeight / 4} ${viewBoxWidth / 2} ${viewBoxHeight / 2}`);
-                    }, 1000);
+            // Update hulls for solution click / selection detection
+            if (solutionGraphs.length > 1) {
+                const hulls = d3.groups(nodes, d => d.agentName).map(([agentName, nodes]) => {
+                    const points = nodes.map(node => [node.x, node.y]);
+                    const hull = d3.polygonHull(points);
+                    return { agentName, hull };
                 });
+    
+                hullPath = hullPath.data(hulls)
+                    .join("path")
+                    .attr("class", "hull")
+                    .attr("d", d => d.hull ? d3.line()(d.hull) : null)
+                    .attr("fill", "transparent")
+                    .on("click", function(event, hull) {
+                        const clickedSolution = hull.agentName;
+                        onSolutionSelected(clickedSolution)
+                    });
+            }
+            
         }
 
         function dragstarted(event, d) {
@@ -290,7 +247,7 @@ export const TokenTransferGraph = () => {
         }
 
         function resize() {
-            const container = d3.select(graphRef.current);
+            const container = d3.select(renderContainerRef.current);
             const { width, height } = container.node().getBoundingClientRect();
 
             svg.attr("width", width).attr("height", height);
@@ -299,12 +256,16 @@ export const TokenTransferGraph = () => {
         window.addEventListener("resize", resize);
         resize();
 
-        for (let i = 0; i < 600; ++i) simulation.tick();
+        // Un-tangle the graph with a charge blast
+        simulation.force("charge", d3.forceManyBody().strength(-9000))
+        for (let i = 0; i < 500; ++i) simulation.tick();
+        simulation.force("charge", d3.forceManyBody().strength(-2000))
+        // for (let i = 0; i < 500; ++i) simulation.tick();
 
         return () => {
             window.removeEventListener("resize", resize);
         };
-    }, [graphData]);
+    }, [solutionGraphs]);
 
     const calculatePerpendicularOffset = (d, offset) => {
         const dx = d.target.x - d.source.x;
@@ -319,6 +280,6 @@ export const TokenTransferGraph = () => {
     }
 
     return (
-        <div ref={graphRef} className="w-full h-[400px] md:h-[700px]"></div>
+        <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px]"></div>
     );
 };

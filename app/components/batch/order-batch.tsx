@@ -1,104 +1,183 @@
 'use client';
 
-import React, {useEffect, useRef, useState} from 'react';
-import {batchData} from "@/components/batch/batches-hardcode";
+import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 import {BatchOrderList} from "@/components/batch/batch-order-list";
 import {SolutionsList} from "@/components/solutions/solutions-list";
-import {Batch} from "@/types";
+import {IBatch, ITokenMetadata} from "@/types";
+import {debounce} from "@/utils/utils";
 
 const TIME_AUTO_CHANGE: number = 4000; // 4000 for develop and testing ( 40000 for prod)
 
-const OrderBatch = () => {
-    const [id,setId] = useState<number>(0);
-    const [currentBatch,setCurrentBatch] = useState<Batch | null>(null);
+interface Props {
+    batch: IBatch;
+    tokenMetadata: ITokenMetadata;
+    selectedSolutionId: string;
+    onSolutionSelected: (id: string) => void;
+    onBatchRequested: (id: string) => void;
+    liveStream:boolean;
+    setLiveStream: (stream: boolean) => void;
+}
+
+const OrderBatch:FC<Props> = ({
+  batch,
+  tokenMetadata,
+  onSolutionSelected: handleSelectSolution,
+  selectedSolutionId,
+  liveStream,
+  setLiveStream,
+  onBatchRequested: fetchBatchId,
+}) => {
 
     const [isRunning, setIsRunning] = useState<boolean>(false);
-
-    const [elapsedTime, setElapsedTime] = useState<number>(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const startTimeRef = useRef<number>(0);
     const remainingTimeRef = useRef<number>(TIME_AUTO_CHANGE);
+    const startTimeRef = useRef<number | null>(null); // Time when the timer was started
 
+    const [inputValueId, setInputValueId] = useState<string>(batch?.batchId.toString());
 
     useEffect(() => {
-        if (!isRunning || id >= batchData.length) return;
+        if(batch?.batchId){
+            setInputValueId(batch?.batchId.toString());
+        }
+    }, [batch]);
 
-        setCurrentBatch(batchData[id]);
+    useEffect(() => {
+        if (liveStream) {
+            resumeTimer();
+        } else {
+            pauseTimer();
+        }
+    }, [liveStream]);
+
+    useEffect(() => {
+        if (!isRunning || !batch) return;
 
         startTimeRef.current = Date.now();
         timerRef.current = setTimeout(() => {
-            setElapsedTime(0);
-            if (id < batchData.length - 1) {
-                setId((prevId) => prevId + 1);
+            if (isRunning) {
+                const nextBatchId = (batch.batchId + 1).toString();
+                fetchBatchId(nextBatchId);
                 remainingTimeRef.current = TIME_AUTO_CHANGE;
-            } else {
-                setIsRunning(false);
             }
         }, remainingTimeRef.current);
 
         return () => {
-            clearTimeout(timerRef.current as NodeJS.Timeout);
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
         };
-    }, [isRunning, id, batchData]);
+    }, [isRunning, batch]);
+
+    // useEffect(() => {
+    //     if (batch) {
+    //         startTimer();
+    //     }
+    // }, [batch]);
 
     useEffect(() => {
-        if (batchData.length > 0) {
-            setCurrentBatch(batchData[0]);
-            startTimer();
-        }
-    }, [batchData]);
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+        };
+    }, []);
 
     const startTimer = () => {
-        if (!isRunning) {
+        if (!isRunning && batch) {
             setIsRunning(true);
+            startTimeRef.current = Date.now();
+            scheduleBatchChange();
         }
+    };
+
+    const scheduleBatchChange = () => {
+        timerRef.current = setTimeout(() => {
+            if (isRunning) {
+                const nextBatchId = (batch.batchId + 1).toString();
+                fetchBatchId(nextBatchId);
+                remainingTimeRef.current = TIME_AUTO_CHANGE;
+                startTimeRef.current = Date.now();
+                scheduleBatchChange(); // Schedule the next batch change
+            }
+        }, remainingTimeRef.current);
     };
 
     const pauseTimer = () => {
         if (isRunning) {
+            setLiveStream(false);
             setIsRunning(false);
-            clearTimeout(timerRef.current as NodeJS.Timeout);
-            const timePassed = Date.now() - startTimeRef.current;
-            remainingTimeRef.current -= timePassed;
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+            if (startTimeRef.current) {
+                const elapsedTime = Date.now() - startTimeRef.current;
+                remainingTimeRef.current -= elapsedTime;
+                startTimeRef.current = null;
+            }
+        }
+    };
+
+    const resumeTimer = () => {
+        if (!isRunning && batch) {
+            setLiveStream(true);
+            setIsRunning(true);
+            startTimeRef.current = Date.now();
+            scheduleBatchChange();
         }
     };
 
     const resetTimer = () => {
         setIsRunning(false);
-        setId(0);
-        setElapsedTime(0);
         remainingTimeRef.current = TIME_AUTO_CHANGE;
-        setCurrentBatch(batchData[0] || null);
-        clearTimeout(timerRef.current as NodeJS.Timeout);
+        startTimeRef.current = null;
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
     };
 
     const prevBatch = () => {
-        if (id > 0) {
-            setId((prevId) => prevId - 1);
-            setCurrentBatch(batchData[id - 1]);
+        if (batch && batch.batchId > 1) {
+            const prevBatchId = (batch.batchId - 1).toString();
+            fetchBatchId(prevBatchId);
+            resetTimer(); // Reset the timer when switching batches manually
+            // startTimer();
         }
     };
 
     const nextBatch = () => {
-        if (id < batchData.length - 1) {
-            setId((prevId) => prevId + 1);
-            setCurrentBatch(batchData[id + 1]);
+        if (batch) {
+            const nextBatchId = (batch.batchId + 1).toString();
+            fetchBatchId(nextBatchId);
+            resetTimer(); // Reset the timer when switching batches manually
+            // startTimer();
         }
     };
+    const debouncedHandleChangeBatchId = useRef(debounce(fetchBatchId, 600)).current;
 
-    const changeCurrentBatch = (value:string) => {
-        //at this place we have logic to get batch by number (need query)
+
+    const changeCurrentBatch = useCallback((value: string) => {
+        const sanitizedValue = value.replace(/[^0-9]/g, '');
+        setInputValueId(sanitizedValue);
+        if (sanitizedValue) {
+            debouncedHandleChangeBatchId(sanitizedValue);
+            resetTimer(); // Reset the timer when changing batches manually
+            // startTimer();
+        }
+    }, [debouncedHandleChangeBatchId]);
+
+    const handleSelectSolutionWithPause = (id:string) => {
+        pauseTimer();
+        handleSelectSolution(id);
     }
-
 
     return (
         <div>
             <div className="container flex justify-between items-center bg-transparent mb-4 m-auto">
                 <button
                     className={`w-10 h-10 flex items-center justify-center rounded-full border-2 border-white text-white transition duration-200
-                          ${id === 0 ? 'bg-brandDisabled text-arrowDisabled border-brandBorderDisabled cursor-not-allowed' : 'hover:bg-brand hover:text-white'}`}
+                          ${batch && batch.batchId === 1 ? 'bg-brandDisabled text-arrowDisabled border-brandBorderDisabled cursor-not-allowed' : 'hover:bg-brand hover:text-white'}`}
                     onClick={prevBatch}
-                    disabled={id === 0}
+                    disabled={batch && batch.batchId === 1}
                 >
                     <svg
                         className="w-6 h-6"
@@ -119,15 +198,14 @@ const OrderBatch = () => {
                     <h2 className="font-semibold text-white text-center mr-3">Batch #</h2>
                     <input style={{ width: '137px' }}
                         className="bg-transparent border-2 border-secondBrand rounded-md text-white text-center"
-                        value={currentBatch?.batchNumber.toString()}
+                        value={inputValueId}
                         onChange={(event) => changeCurrentBatch(event.target.value)}
                     />
                 </div>
                 <button
                     className={`w-10 h-10 flex items-center justify-center rounded-full border-2 border-white text-white transition duration-200
-                            ${id === batchData.length - 1 ? 'bg-brandDisabled border-brandBorderDisabled text-arrowDisabled' : 'hover:bg-brand hover:text-white'}`}
+                        hover:bg-brand hover:text-white`}
                     onClick={nextBatch}
-                    disabled={id === batchData.length - 1}
                 >
                     <svg
                         className="w-6 h-6"
@@ -146,35 +224,42 @@ const OrderBatch = () => {
                 </button>
             </div>
             {
-                currentBatch &&
-                <>
-                    <div className="container rounded-lg mb-4">
-                        <button
-                            className="container flex justify-center px-4 py-2 rounded-md text-backgroundPage transition-colors duration-200 ease-in-out
-                        bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            onClick={() => isRunning ? pauseTimer() : startTimer() }
-                        >
-                            {isRunning ?
-                                <div className="flex">
-                                    <img  src="/pause.svg" className="mr-2" alt="" />
-                                    Pause
-                                </div>
-                                :
-                                <div className="flex">
-                                    <img  src="/livestream.svg" className="mr-2" alt="" />
-                                    Livestream
-                                </div>
-                            }
-                        </button>
-                    </div>
+                batch &&
+                <>  
+                    {/* {
+                        isRunning && 
+                        <div className="container rounded-lg mb-4">
+                            <button
+                                className="container flex justify-center px-4 py-2 rounded-md text-backgroundPage transition-colors duration-200 ease-in-out
+                            bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                onClick={() => isRunning ? pauseTimer() : resumeTimer() }
+                            >
+                                {isRunning ?
+                                    <div className="flex">
+                                        <img  src="/pause.svg" className="mr-2" alt="" />
+                                        Pause
+                                    </div>
+                                    :
+                                    <div className="flex">
+                                        <img  src="/livestream.svg" className="mr-2" alt="" />
+                                        Livestream
+                                    </div>
+                                }
+                            </button>
+                        </div>
+                    } */}
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96 mb-4">
                         <div className="font-semibold text-white mb-4 text-left">Orders</div>
-                        <BatchOrderList currentBatch={currentBatch}/>
+                        <BatchOrderList currentBatch={batch} tokenMetadata={tokenMetadata}/>
                     </div>
 
                     <div className="bg-brand p-4 rounded-lg shadow-lg w-96">
                         <div className="font-semibold text-white mb-2 text-left">Solutions</div>
-                        <SolutionsList currentBatch={currentBatch}/>
+                        <SolutionsList
+                            currentBatch={batch}
+                            selectedSolutionId={selectedSolutionId}
+                            handleSelectSolution={handleSelectSolutionWithPause}
+                        />
                     </div>
                 </>
             }

@@ -7,6 +7,16 @@ export interface Order {
     orderId: string;
 }
 
+export interface ITokenMetadata {
+    [key: string]: {
+        name: string;
+        symbol: string;
+        icon: string;
+        decimals: number;
+        address: number;
+    }
+}
+
 export interface Batch {
     batchTime: string;
     batchNumber: number;
@@ -15,17 +25,51 @@ export interface Batch {
     solutions: ISolution[];
 }
 
+export interface IBatch {
+    batchId: number;
+    orders: IOrder[];
+    solutions: ISolution[];
+    fillData: {
+        agentName: string;
+        tx: string;
+        route: IRouteStep[];
+    }
+}
+
+export interface IOrder {
+    dstAddress: string;
+    dstToken: string;
+    expiration: number;
+    intentId: number;
+    minReceived: number;
+    srcAddress: string;
+    srcAmount: number;
+    srcToken: string;
+    status: string;
+}
+
+export interface IRouteStep {
+    dstAddress: string;
+    dstImage: string;
+    dstName: string;
+    sentAmount: number;
+    sentToken: string;
+    srcAddress: string;
+    srcImage: string;
+    srcName: string;
+}
+
 export interface ISolution {
-    agentName: string;
-    agentImage: string;
-    route: {
-            venueName: string;
-            venueImage: string;
-    }[];
-    solutionScore: number;
+    agent: {
+        image: string;
+        name: string;
+    }
+    route: IRouteStep[];
+    score: number;
 }
 
 export interface IBatchOrder {
+    id?: string;
     srcToken: {
         image: string;
         name: string;
