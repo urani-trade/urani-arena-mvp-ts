@@ -4,6 +4,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './index.css';
 
+import Sparkle from '@/components/sparkle';
+
 export function TokenTransferGraph({
     solutions,
     onSolutionSelected,
@@ -237,8 +239,7 @@ export function TokenTransferGraph({
                     const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
 
                     div.style.width = `${length}px`;
-                    div.style.height = `10px`;
-                    div.style.backgroundColor = `red`;
+                    div.style.height = `30px`;
                     div.style.position = `absolute`;
                     div.style.top = `${y1}px`;
                     div.style.left = `${x1}px`;
@@ -332,7 +333,9 @@ export function TokenTransferGraph({
                     key={i}
                     ref={el => pathDivRefs.current[i] = el}
                     style={{ position: 'absolute', display: 'none', pointerEvents: 'none' }}
-                />
+                >  
+                    <Sparkle count={10}/>
+                </div>
             ))}
         </div>
     );
