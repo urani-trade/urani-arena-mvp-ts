@@ -128,7 +128,7 @@ export function TokenTransferGraph({
         const path = g.append("g").selectAll("path")
             .data(links)
             .enter().append("path")
-            .attr("class", "link")
+            .attr("class", d => `link ${(d.source.name.includes('User') && d.target.name.includes('User')) ? 'pulsate' : ''}`)
             .attr("marker-end", "url(#end)")
             .style("stroke", "white");
 
@@ -146,7 +146,6 @@ export function TokenTransferGraph({
         const node = g.selectAll(".node")
             .data(nodes)
             .enter().append("g")
-            .attr("class", "node")
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)

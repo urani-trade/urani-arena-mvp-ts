@@ -15,3 +15,23 @@ text {
     font: 10px sans-serif;
     pointer-events: none;
 }
+
+@keyframes pulse {
+    0% {
+      stroke: #9b59b6;
+      fill: #9b59b6;
+    }
+    50% {
+      stroke: #fff;
+      fill: #fff;
+    }
+    100% {
+      stroke: #9b59b6;
+      fill: #9b59b6;
+    }
+  }
+  
+  .link.pulsate {
+    animation: pulse 2s infinite;
+  }
+  
