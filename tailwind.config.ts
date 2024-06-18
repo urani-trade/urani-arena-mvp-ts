@@ -8,16 +8,24 @@ const config: Config = {
   ],
   theme: {
     screens: {
+      xs: '320px',
       sm: '480px',
       md: '768px',
-      lg: '1024',
+      lg: '1024px',
       xl: '1200px',
     },
     extend: {
+      screens: {
+        max_sm: {'max': '480px'},
+        max_md: {'max': '768px'},
+        max_lg: {'max': '1024px'},
+        max_xl: {'max': '1200px'},
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "custom-gradient": "linear-gradient(90deg, #EBE5F8 0%, #C4C6F9 33%, #C4C6F9 56%, #EBE5F8 100%)",
       },
       colors: {
         brand: '#4C3E8C',
