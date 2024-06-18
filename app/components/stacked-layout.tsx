@@ -74,7 +74,7 @@ export function StackedLayout({
       </MobileSidebar>
 
       {/* Navbar */}
-      <header className="flex items-center px-4 bg-custom-gradient">
+      <header className="flex items-center px-4 bg-custom-gradient font-dm-sans">
         <div className="py-2.5 lg:hidden">
           <NavbarItem onClick={() => setShowSidebar(true)} aria-label="Open navigation">
             <OpenMenuIcon />

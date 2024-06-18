@@ -45,7 +45,7 @@ export default function RootLayout({
           <Navbar>
               <NavbarItem className="max_lg:hidden" href="https://urani.trade">
                 <img src="/urani.svg" />
-                <NavbarLabel>Urani</NavbarLabel>
+                {/*<NavbarLabel>Urani</NavbarLabel>*/}
               </NavbarItem>
             <NavbarSection className="max_lg:hidden ml-10 max_md:ml-6">
               {navItems.map(({ label, url }) => (

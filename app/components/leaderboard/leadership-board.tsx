@@ -179,7 +179,7 @@ export const LeaderShipBoard:FC = () => {
                                             index === 0 ? 'first:rounded-t-lg' : ''
                                         } ${index === sortedData.length - 1 ? 'last:rounded-b-lg' : ''}`}
                                     >
-                                        <td className="px-1">
+                                        <td className="px-3">
                                             {markTopPlayersInTable(player.id) == 'batches' &&
                                                 <img className="w-8 h-8 max_md:w-6 max_md:h-6"
                                                      src='/most-batches.svg' alt=''
@@ -193,7 +193,7 @@ export const LeaderShipBoard:FC = () => {
                                                      src='/most-surplus.svg' alt=''
                                                 />}
                                             {!['batches', 'volume', 'surplus'].includes(markTopPlayersInTable(player.id)) && (
-                                                <span className="text-sm md:text-xs">#{index + 1}</span>
+                                                <span className="text-sm md:text-xs pl-1">#{index + 1}</span>
                                             )}
                                         </td>
                                         <td className={`px-1 py-2 flex items-center`}>

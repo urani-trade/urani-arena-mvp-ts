@@ -15,6 +15,9 @@ const config: Config = {
       xl: '1200px',
     },
     extend: {
+      fontFamily: {
+        'dm-sans': ['"DM Sans"', 'sans-serif'],
+      },
       screens: {
         max_sm: {'max': '480px'},
         max_md: {'max': '768px'},
