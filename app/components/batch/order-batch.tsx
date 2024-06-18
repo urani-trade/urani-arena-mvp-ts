@@ -171,7 +171,7 @@ const OrderBatch:FC<Props> = ({
     }
 
     return (
-        <div>
+        <div className="m-auto">
             <div className="container flex justify-between items-center bg-transparent mb-4 m-auto">
                 <button
                     className={`w-10 h-10 flex items-center justify-center rounded-full border-2 border-white text-white transition duration-200

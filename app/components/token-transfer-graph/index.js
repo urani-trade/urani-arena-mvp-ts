@@ -4,18 +4,21 @@ import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import './index.css';
 
-export function TokenTransferGraph ({
-   solutions,
-   onSolutionSelected,
-   tokenMetadata
+import Sparkle from '@/components/sparkle';
+
+export function TokenTransferGraph({
+    solutions,
+    onSolutionSelected,
+    tokenMetadata
 }) {
     const [solutionGraphs, setSolutionGraphs] = useState(null);
     const renderContainerRef = useRef(null);
+    const pathDivRefs = useRef([]);
 
-    useEffect(() => {        
+    useEffect(() => {
         if (solutions?.length > 0) {
-            const solutionsGraphs = solutions.map((solution, index)=> {
-                let agentName = solution.agent.name
+            const solutionsGraphs = solutions.map((solution, index) => {
+                let agentName = solution.agent.name;
 
                 // Extract nodes
                 let nodes = new Set();
@@ -28,48 +31,54 @@ export function TokenTransferGraph ({
                     const imageUrl = routeStep ? (routeStep.srcName === name ? routeStep.srcImage : routeStep.dstImage) : '';
                     return {
                         id: `${agentName}-${name}`,
-                        name, 
+                        name,
                         agentName,
                         imageUrl,
                         solutionIndex: index
                     };
                 });
-                
+
                 // Extract links
                 let links = solution.route.map(routeStep => {
-                    let formattedAmount = (routeStep.sentAmount / Math.pow(10, tokenMetadata[routeStep.sentToken].decimals)).toFixed(tokenMetadata[routeStep.sentToken].decimals)
+                    let formattedAmount = (routeStep.sentAmount / Math.pow(10, tokenMetadata[routeStep.sentToken].decimals)).toFixed(tokenMetadata[routeStep.sentToken].decimals);
                     return {
                         source: `${agentName}-${routeStep.srcName}`,
                         target: `${agentName}-${routeStep.dstName}`,
-                        value: `${formattedAmount} ${tokenMetadata[routeStep.sentToken].symbol}`
-                    }
+                        value: `${formattedAmount} ${tokenMetadata[routeStep.sentToken].symbol}`,
+                        id: `${agentName}-${routeStep.srcName}-${routeStep.dstName}`,
+                    };
                 });
 
-                return  {
+                return {
                     agentName,
                     nodes,
                     links
-                }
+                };
             });
 
             setSolutionGraphs(solutionsGraphs);
         }
-    }, [solutions]);
+    }, [solutions, tokenMetadata]);
 
     useEffect(() => {
         if (!solutionGraphs) return;
 
-        let nodes = Array.from(new Set(solutionGraphs.map(graph => graph.nodes).flat()));
-        let links = solutionGraphs.map(graph => graph.links).flat();
-
         const container = d3.select(renderContainerRef.current);
         container.select("svg").remove(); // Remove existing SVG to avoid duplicates
 
-        const { width, height } = container.node().getBoundingClientRect();
-        
+        let nodes = Array.from(new Set(solutionGraphs.map(graph => graph.nodes).flat()));
+        let links = solutionGraphs.map(graph => graph.links).flat();
+
+        let { width, height } = container.node().getBoundingClientRect();
+
         // Define the width and height for the SVG's viewBox
-        const viewBoxWidth = 1000;
-        const viewBoxHeight = 1000;
+        let viewBoxWidth = width *2;
+        let viewBoxHeight = height *2;
+
+        if (solutions.length <= 1) {
+            viewBoxWidth = Math.floor(viewBoxWidth / 2);
+            viewBoxHeight = Math.floor(viewBoxHeight / 2);
+        }
 
         const centerX = viewBoxWidth / 2;
         const centerY = viewBoxHeight / 2;
@@ -83,7 +92,7 @@ export function TokenTransferGraph ({
             .on("tick", tick);
 
         if (solutionGraphs.length > 1) {
-            simulation.force("tangential", tangentialForce(2, centerX, centerY))
+            simulation.force("tangential", tangentialForce(2, centerX, centerY));
         }
 
         // Periodically reset alpha to maintain stability
@@ -95,7 +104,7 @@ export function TokenTransferGraph ({
             .attr("width", width)
             .attr("height", height)
             .attr("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`)
-            .attr("preserveAspectRatio", "xMidYMid meet")
+            .attr("preserveAspectRatio", "none")
             .style("background-color", "transparent");
 
         const g = svg.append("g");
@@ -119,7 +128,7 @@ export function TokenTransferGraph ({
         const path = g.append("g").selectAll("path")
             .data(links)
             .enter().append("path")
-            .attr("class", "link")
+            .attr("class", d => `link ${(d.source.name.includes('User') && d.target.name.includes('User')) ? 'pulsate' : ''}`)
             .attr("marker-end", "url(#end)")
             .style("stroke", "white");
 
@@ -137,18 +146,12 @@ export function TokenTransferGraph ({
         const node = g.selectAll(".node")
             .data(nodes)
             .enter().append("g")
-            .attr("class", "node")
             .call(d3.drag()
                 .on("start", dragstarted)
                 .on("drag", dragged)
                 .on("end", dragended));
 
         // Add the circle icons with images for the nodes
-        // node.append("circle")
-        //     .attr("r", 30)
-        //     .attr("fill", "transparent")
-        //     .attr("stroke", "transparent");
-
         node.append("image")
             .attr("xlink:href", d => d.imageUrl)
             .attr("x", -15)
@@ -200,18 +203,55 @@ export function TokenTransferGraph ({
                     const hull = d3.polygonHull(points);
                     return { agentName, hull };
                 });
-    
+
                 hullPath = hullPath.data(hulls)
                     .join("path")
                     .attr("class", "hull")
                     .attr("d", d => d.hull ? d3.line()(d.hull) : null)
                     .attr("fill", "transparent")
-                    .on("click", function(event, hull) {
+                    .on("click", function (event, hull) {
                         const clickedSolution = hull.agentName;
-                        onSolutionSelected(clickedSolution)
+                        onSolutionSelected(clickedSolution);
                     });
             }
-            
+
+            // Update P2P highlight divs
+            // TODO dynamically add these instead of using static divs
+            let divIndex = 0;
+            links.forEach(link => {
+                const sourceIsUser = link.source.name.includes("User");
+                const targetIsUser = link.target.name.includes("User");
+                if (sourceIsUser && targetIsUser && divIndex < pathDivRefs.current.length) {
+                    const div = pathDivRefs.current[divIndex];
+                    divIndex += 1;
+
+                    const sourceNode = nodes.find(n => n.id === link.source.id);
+                    const targetNode = nodes.find(n => n.id === link.target.id);
+
+                    // Calculate the positions based on the viewBox
+                    const x1 = sourceNode.x / viewBoxWidth * width;
+                    const y1 = sourceNode.y / viewBoxHeight * height;
+                    const x2 = targetNode.x / viewBoxWidth * width;
+                    const y2 = targetNode.y / viewBoxHeight * height;
+
+                    const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                    div.style.width = `${length}px`;
+                    div.style.height = `30px`;
+                    div.style.position = `absolute`;
+                    div.style.top = `${y1}px`;
+                    div.style.left = `${x1}px`;
+                    div.style.transformOrigin = `0 0`;
+                    div.style.transform = `rotate(${angle}deg)`;
+                    div.style.display = 'block';
+                }
+            });
+
+            // Hide unused divs
+            for (let i = divIndex; i < pathDivRefs.current.length; i++) {
+                pathDivRefs.current[i].style.display = 'none';
+            }
         }
 
         function dragstarted(event, d) {
@@ -232,7 +272,7 @@ export function TokenTransferGraph ({
         }
 
         function tangentialForce(strength, cx, cy) {
-            return function() {
+            return function () {
                 nodes.forEach(d => {
                     const dx = d.x - cx;
                     const dy = d.y - cy;
@@ -246,25 +286,31 @@ export function TokenTransferGraph ({
             };
         }
 
-        function resize() {
-            const container = d3.select(renderContainerRef.current);
-            const { width, height } = container.node().getBoundingClientRect();
-
-            svg.attr("width", width).attr("height", height);
-        }
-
-        window.addEventListener("resize", resize);
-        resize();
-
         // Un-tangle the graph with a charge blast
-        simulation.force("charge", d3.forceManyBody().strength(-9000))
+        simulation.force("charge", d3.forceManyBody().strength(-9000));
         for (let i = 0; i < 500; ++i) simulation.tick();
-        simulation.force("charge", d3.forceManyBody().strength(-2000))
-        // for (let i = 0; i < 500; ++i) simulation.tick();
+        simulation.force("charge", d3.forceManyBody().strength(-2000));
+        // for (let i = 0; i < 500; ++i) simulation tick();
 
-        return () => {
-            window.removeEventListener("resize", resize);
-        };
+
+
+        // TODO don't worry about resizing, pass in width and height as props
+        // function resize() {
+        //     const container = d3.select(renderContainerRef.current);
+        //     ({ width, height } = container.node().getBoundingClientRect());
+        //     [viewBoxWidth, viewBoxHeight] = [width*2, height*2]
+
+        //     svg
+        //     .attr("width", width)
+        //     .attr("height", height)
+        //     .attr("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
+        // }
+        // window.addEventListener("resize", resize);
+        // resize();
+        // return () => {
+        //     window.removeEventListener("resize", resize);
+        // };
+
     }, [solutionGraphs]);
 
     const calculatePerpendicularOffset = (d, offset) => {
@@ -277,9 +323,19 @@ export function TokenTransferGraph ({
             dx: perpendicularX,
             dy: perpendicularY
         };
-    }
+    };
 
     return (
-        <div ref={renderContainerRef} className="w-full h-[400px] md:h-[700px]"></div>
+        <div ref={renderContainerRef} className="w-full h-full relative">
+            {Array.from({ length: 10 }).map((_, i) => (
+                <div
+                    key={i}
+                    ref={el => pathDivRefs.current[i] = el}
+                    style={{ position: 'absolute', display: 'none', pointerEvents: 'none' }}
+                >  
+                    <Sparkle count={10}/>
+                </div>
+            ))}
+        </div>
     );
-};
+}

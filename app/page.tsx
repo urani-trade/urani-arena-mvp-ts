@@ -1,6 +1,5 @@
-
-import Arena from './arena/page'
+import Arena from '@/components/arena';
 
 export default function Home() {
-  return <Arena/>
+  return <Arena liveStream={true} />;
 }
