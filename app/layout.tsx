@@ -36,17 +36,18 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/light-bg.svg" type="image/svg+xml" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
       </head>
       <body className={inter.className}>
-        <StackedLayout 
+        <StackedLayout
         navbar={
           <div className="lg:mx-40">
           <Navbar>
-              <NavbarItem className="max-lg:hidden" href="https://urani.trade">
+              <NavbarItem className="max_lg:hidden" href="https://urani.trade">
                 <img src="/urani.svg" />
-                <NavbarLabel>Urani</NavbarLabel>
+                {/*<NavbarLabel>Urani</NavbarLabel>*/}
               </NavbarItem>
-            <NavbarSection className="max-lg:hidden ml-10">
+            <NavbarSection className="max_lg:hidden ml-10 max_md:ml-6">
               {navItems.map(({ label, url }) => (
                 <NavbarItem key={label} href={url}>
                   {label}
@@ -57,7 +58,7 @@ export default function RootLayout({
             <NavbarSection>
               <NavbarItem>
                 <SparklesIcon />
-                2HPwR...5gSJr
+                <span className="text-md max_md:text-sm max_sm:text-xs">2HPwR...5gSJr</span>
               </NavbarItem>
             </NavbarSection>
           </Navbar>
@@ -83,7 +84,7 @@ export default function RootLayout({
           </Sidebar>
         }
         footer={<Footer/>}
-      > 
+      >
         {children}
       </StackedLayout>
 

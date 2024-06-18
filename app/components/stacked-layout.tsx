@@ -42,8 +42,8 @@ function MobileSidebar({ open, close, children }: React.PropsWithChildren<{ open
           leaveFrom="translate-x-0"
           leaveTo="-translate-x-full"
         >
-          <Headless.DialogPanel className="fixed inset-y-0 w-full max-w-80 p-2 transition">
-            <div className="flex h-full flex-col rounded-lg bg-white shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
+          <Headless.DialogPanel className="fixed inset-y-0 w-full max-w-80 p-2 transition ">
+            <div className="flex h-full flex-col rounded-lg bg-white shadow-sm ring-1 bg-custom-gradient">
               <div className="-mb-3 px-4 pt-3">
                 <Headless.CloseButton as={NavbarItem} aria-label="Close navigation">
                   <CloseMenuIcon />
@@ -67,14 +67,14 @@ export function StackedLayout({
   let [showSidebar, setShowSidebar] = useState(false)
 
   return (
-    <div className="relative isolate flex min-h-svh w-full flex-col bg-white lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
+    <div className="relative isolate flex min-h-svh w-full flex-col bg-white">
       {/* Sidebar on mobile */}
       <MobileSidebar open={showSidebar} close={() => setShowSidebar(false)}>
         {sidebar}
       </MobileSidebar>
 
       {/* Navbar */}
-      <header className="flex items-center px-4">
+      <header className="flex items-center px-4 bg-custom-gradient font-dm-sans">
         <div className="py-2.5 lg:hidden">
           <NavbarItem onClick={() => setShowSidebar(true)} aria-label="Open navigation">
             <OpenMenuIcon />
@@ -85,7 +85,7 @@ export function StackedLayout({
 
       {/* Content */}
       <main className="flex bg-backgroundPage flex-1 flex-col">
-        <div className="grow p-6 lg:rounded-lg bg-backgroundPage lg:p-10 lg:shadow-sm lg:ring-1 lg:ring-zinc-950/5 dark:lg:bg-zinc-900 dark:lg:ring-white/10">
+        <div className="p-10 md:p-8 sm:p-4 xs:p-2 bg-backgroundPage">
           <div className="mx-auto max-w-7xl">{children}</div>
         </div>
       </main>
