@@ -1,27 +1,35 @@
 'use client';
 
-import OrderBatch from '@/components/batch/order-batch'
-import { TokenTransferGraph } from '@/components/token-transfer-graph'
-import {useEffect, useState, useCallback, useMemo} from "react";
+import OrderBatch from '@/components/batch/order-batch';
+import { TokenTransferGraph } from '@/components/token-transfer-graph';
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter } from 'next/navigation'; // Correct import for app directory
 import axios from "axios";
-import {log} from "next/dist/server/typescript/utils";
-import {IBatch, ISolution, ITokenMetadata} from "@/types";
-import * as process from "process";
+import { IBatch, ITokenMetadata } from "@/types";
 
-export default function Arena() {
+const DEFAULT_BATCH_ID = '1'; // Change this to your actual default batch ID
+
+export default function Arena({ initialBatchId, liveStream }: { initialBatchId?: string, liveStream?: boolean }) {
+  const router = useRouter();
+  const actualBatchId = initialBatchId || DEFAULT_BATCH_ID;
 
   const [selectedSolutionId, setSelectedSolutionId] = useState<string>('');
-  const [selectedBatchId, setSelectedBatchId] = useState<string>('1');
+  const [selectedBatchId, setSelectedBatchId] = useState<string>(actualBatchId);
   const [batchData, setBatchData] = useState<IBatch | null>(null);
-  const [liveStream,setLiveStream] = useState<boolean>(true);
+  const [liveStreamState, setLiveStreamState] = useState<boolean>(liveStream || false);
   const [tokenMetadata, setTokenMetadata] = useState<ITokenMetadata | null>(null);
-  
 
   useEffect(() => {
-    fetchBatch(selectedBatchId);
+    setSelectedBatchId(actualBatchId);
+  }, [actualBatchId]);
+
+  useEffect(() => {
+    if (selectedBatchId) {
+      fetchBatch(selectedBatchId);
+    }
   }, [selectedBatchId]);
 
-  async function fetchBatch (id:string) {
+  async function fetchBatch(id: string) {
     try {
       let orderbookUrl = process.env.NEXT_PUBLIC_ORDERBOOK_URL;
       if (!orderbookUrl) {
@@ -31,11 +39,10 @@ export default function Arena() {
       const response = await axios.get(
         `${orderbookUrl}/api/batches/${id}`
       );
+
       setBatchData(response.data);
       setTokenMetadata(response.data.tokenMetadata);
-      console.log('Batch Data:', response.data);
-      console.log('Token Metadata:', response.data.tokenMetadata);
-    } 
+    }
     catch (error) {
       console.error('Error:', error);
     }
@@ -43,7 +50,7 @@ export default function Arena() {
 
   const onSolutionSelected = useCallback((id: string) => {
     console.log('onSolutionSelected', id);
-    setLiveStream(false);
+    setLiveStreamState(false);
     setSelectedSolutionId(id);
   }, []);
 
@@ -51,9 +58,11 @@ export default function Arena() {
     console.log('onBatchRequested', id);
     setSelectedSolutionId('');
     setSelectedBatchId(id);
-  }, []);
+    if (!liveStream) {
+      // TODO update url to batch Id
+    }
+  }, [router, liveStream]);
 
-  // Use useMemo to memoize the filtered solutions
   const filteredSolutions = useMemo(() => {
     return batchData?.solutions.filter(solution => solution.agent.name === selectedSolutionId || !selectedSolutionId);
   }, [batchData, selectedSolutionId]);
@@ -63,7 +72,7 @@ export default function Arena() {
       <div className="relative w-full w-8/10 order-2 md:order-1">
         {
           selectedSolutionId &&
-          <button className="absolute left-[25px] top-[16px] flex items-center py-2 px-3 rounded-md transition-colors duration-200 ease-in-out
+          <button className="z-10 absolute left-[25px] top-[16px] flex items-center py-2 px-3 rounded-md transition-colors duration-200 ease-in-out
             bg-white hover:bg-hoverWhite active:bg-hoverWhite focus:outline-none focus:ring-2"
             onClick={setSelectedSolutionId.bind(null, '')}
           >
@@ -73,13 +82,15 @@ export default function Arena() {
             </p>
           </button>
         }
-        <TokenTransferGraph
-          solutions={filteredSolutions}
-          tokenMetadata={tokenMetadata!}
-          onSolutionSelected={onSolutionSelected}
-        />
+        <div className="h-3/4-vh md:h-1/3-vh">
+          <TokenTransferGraph
+            solutions={filteredSolutions}
+            tokenMetadata={tokenMetadata!}
+            onSolutionSelected={onSolutionSelected}
+          />
+        </div>
       </div>
-      <div className="w-2/10 order-1 md:order-2 flex items-center  md:justify-end text-center md:text-left lg:ml-20">
+      <div className="w-2/10 order-1 md:order-2 flex items-center md:items-center text-center md:text-left lg:ml-20">
         {
           batchData &&
           <OrderBatch
@@ -88,13 +99,11 @@ export default function Arena() {
             tokenMetadata={tokenMetadata!}
             selectedSolutionId={selectedSolutionId as string}
             onSolutionSelected={onSolutionSelected}
-            liveStream={liveStream}
-            setLiveStream={setLiveStream}
+            liveStream={liveStreamState}
+            setLiveStream={setLiveStreamState}
           />
         }
       </div>
     </div>
   );
 }
-
-
