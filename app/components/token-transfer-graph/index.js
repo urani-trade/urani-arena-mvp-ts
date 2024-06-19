@@ -123,12 +123,13 @@ export function TokenTransferGraph({
             .style("stroke", "white");
 
         // Define a static arrowhead path
-        const arrowheadPath = "M 0 -7 L 14 0 L 0 7 Z";
+        const arrowheadPath = "M 0 -4 L 9 0 L 0 4 Z";
 
         // Append arrowhead to each link group
         linkGroups.append("path")
             .attr("d", arrowheadPath)
             .attr("class", d => `link ${(d.source.name.includes('User') && d.target.name.includes('User')) ? 'pulsate' : ''}`)
+            .style("stroke", "white")
             .style("fill", "white");
             
         // Add the link labels
@@ -179,7 +180,7 @@ export function TokenTransferGraph({
         
             // Update position and rotation of arrowhead groups
             linkGroups.attr("transform", d => {
-                const lineOffset = 37;
+                const lineOffset = 34;
                 const totalLength = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
                 const reductionRatio = lineOffset / totalLength;
         
