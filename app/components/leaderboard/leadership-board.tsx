@@ -47,20 +47,11 @@ export const LeaderShipBoard:FC = () => {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
             setSortKey(key);
-            setSortOrder('asc');
+            setSortOrder('desc');
         }
     };
 
     const topPlayers = useGetLeaders(leaderData);
-
-    const markTopPlayersInTable = (id:string) => {
-        if(topPlayers){
-            if(id == topPlayers[0].player.id) return 'batches';
-            if(id == topPlayers[1].player.id) return 'volume';
-            if(id == topPlayers[2].player.id) return 'surplus';
-        }
-        return '';
-    }
 
     return (
         <div className="mt-10 max_lg:mt-6 max_md:mt-0 flex flex-col p-2 max_lg:p-0 max_sm:p-1">
@@ -172,7 +163,15 @@ export const LeaderShipBoard:FC = () => {
                                 </tr>
                                 </thead>
                                 <tbody className="space-y-2">
-                                { sortedData.map((player, index) => (
+                                { sortedData.map((player, index) => {
+                                    const descendingOrder = sortOrder === 'desc';
+                                    const ascendingOrder = sortOrder === 'asc';
+
+                                    const shouldShowImage = descendingOrder ? index < 3 : index >= sortedData.length - 3;
+
+                                    // Calculate the correct image index for descending or ascending order
+                                    const imageIndex = descendingOrder ? index : sortedData.length - index - 1;
+                                    return (
                                     <tr
                                         key={player.id}
                                         className={`bg-brand ${
@@ -180,19 +179,19 @@ export const LeaderShipBoard:FC = () => {
                                         } ${index === sortedData.length - 1 ? 'last:rounded-b-lg' : ''}`}
                                     >
                                         <td className="px-3">
-                                            {markTopPlayersInTable(player.id) == 'batches' &&
-                                                <img className="w-8 h-8 max_md:w-6 max_md:h-6"
-                                                     src='/most-batches.svg' alt=''
-                                                />}
-                                            {markTopPlayersInTable(player.id) == 'volume' &&
-                                                <img className="w-8 h-8 max_md:w-6 max_md:h-6"
-                                                     src='/most-volume.svg' alt=''
-                                                />}
-                                            {markTopPlayersInTable(player.id) == 'surplus' &&
-                                                <img className="w-8 h-8 max_md:w-6 max_md:h-6"
-                                                     src='/most-surplus.svg' alt=''
-                                                />}
-                                            {!['batches', 'volume', 'surplus'].includes(markTopPlayersInTable(player.id)) && (
+                                            {shouldShowImage ? (
+                                                <>
+                                                    {imageIndex % 3 === 0 && (
+                                                        <img className="w-8 h-8 max_md:w-6 max_md:h-6" src='/most-batches.svg' alt='Most Batches' />
+                                                    )}
+                                                    {imageIndex % 3 === 1 && (
+                                                        <img className="w-8 h-8 max_md:w-6 max_md:h-6" src='/most-volume.svg' alt='Most Volume' />
+                                                    )}
+                                                    {imageIndex % 3 === 2 && (
+                                                        <img className="w-8 h-8 max_md:w-6 max_md:h-6" src='/most-surplus.svg' alt='Most Surplus' />
+                                                    )}
+                                                </>
+                                            ) : (
                                                 <span className="text-sm md:text-xs pl-1">#{index + 1}</span>
                                             )}
                                         </td>
@@ -220,7 +219,8 @@ export const LeaderShipBoard:FC = () => {
                                             ${player.cost.toLocaleString()}
                                         </td>
                                     </tr>
-                                ))}
+                                )}
+                                )}
                                 </tbody>
                             </table>
                         </div>
