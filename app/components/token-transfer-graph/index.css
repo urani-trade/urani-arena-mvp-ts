@@ -20,18 +20,21 @@ text {
     0% {
       stroke: #9b59b6;
       fill: #9b59b6;
+      stroke-width: 2px;
     }
     50% {
       stroke: #fff;
       fill: #fff;
+      stroke-width: 4px;
     }
     100% {
       stroke: #9b59b6;
       fill: #9b59b6;
+      stroke-width: 2px;
     }
   }
   
-  .link.pulsate {
+  path.link.pulsate {
     animation: pulse 2s infinite;
   }
   

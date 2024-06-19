@@ -109,29 +109,29 @@ export function TokenTransferGraph({
 
         const g = svg.append("g");
 
-        // Build the arrow
-        g.append("defs").selectAll("marker")
-            .data(["end"])
-            .enter().append("marker")
-            .attr("id", String)
-            .attr("viewBox", "0 -5 10 10")
-            .attr("refX", 10)
-            .attr("refY", 0)
-            .attr("markerWidth", 6)
-            .attr("markerHeight", 6)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M0,-5L10,0L0,5")
-            .attr("fill", "white");
+        // Create a group element for each link
+        const linkGroups = g.append("g").selectAll("g")
+            .data(links)
+            .enter().append("g")
+            .attr("class", "link-group");
 
         // Add the links and the arrows
         const path = g.append("g").selectAll("path")
             .data(links)
             .enter().append("path")
             .attr("class", d => `link ${(d.source.name.includes('User') && d.target.name.includes('User')) ? 'pulsate' : ''}`)
-            .attr("marker-end", "url(#end)")
             .style("stroke", "white");
 
+        // Define a static arrowhead path
+        const arrowheadPath = "M 0 -4 L 9 0 L 0 4 Z";
+
+        // Append arrowhead to each link group
+        linkGroups.append("path")
+            .attr("d", arrowheadPath)
+            .attr("class", d => `link ${(d.source.name.includes('User') && d.target.name.includes('User')) ? 'pulsate' : ''}`)
+            .style("stroke", "white")
+            .style("fill", "white");
+            
         // Add the link labels
         const linkLabels = g.append("g").selectAll(".link-label")
             .data(links)
@@ -168,14 +168,28 @@ export function TokenTransferGraph({
                 const lineOffset = 25;
                 const totalLength = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
                 const reductionRatio = lineOffset / totalLength;
-
+        
                 const sourceX = d.source.x + (d.target.x - d.source.x) * reductionRatio;
                 const sourceY = d.source.y + (d.target.y - d.source.y) * reductionRatio;
                 const targetX = d.target.x - (d.target.x - d.source.x) * reductionRatio;
                 const targetY = d.target.y - (d.target.y - d.source.y) * reductionRatio;
-
+        
                 const delta = calculatePerpendicularOffset(d, 4);
                 return `M${sourceX + delta.dx},${sourceY + delta.dy}L${targetX + delta.dx},${targetY + delta.dy}`;
+            });
+        
+            // Update position and rotation of arrowhead groups
+            linkGroups.attr("transform", d => {
+                const lineOffset = 34;
+                const totalLength = Math.sqrt(Math.pow(d.target.x - d.source.x, 2) + Math.pow(d.target.y - d.source.y, 2));
+                const reductionRatio = lineOffset / totalLength;
+        
+                const targetX = d.target.x - (d.target.x - d.source.x) * reductionRatio;
+                const targetY = d.target.y - (d.target.y - d.source.y) * reductionRatio;
+        
+                const angle = Math.atan2(targetY - d.source.y, targetX - d.source.x) * 180 / Math.PI;
+                const delta = calculatePerpendicularOffset(d, 4);
+                return `translate(${targetX + delta.dx},${targetY + delta.dy}) rotate(${angle})`;
             });
 
             linkLabels
