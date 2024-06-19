@@ -6,6 +6,10 @@ interface Props {
     currentBatch: IBatch;
     tokenMetadata: ITokenMetadata
 }
+const transitionConfig = {
+    duration: 0.6,
+    ease: [0.43, 0.13, 0.23, 0.66],
+};
 
 export const BatchOrderList:FC<Props> = ({currentBatch, tokenMetadata}) => {
     return (
@@ -14,10 +18,10 @@ export const BatchOrderList:FC<Props> = ({currentBatch, tokenMetadata}) => {
                 {currentBatch && currentBatch.orders.map((order, index) => (
                     <motion.div
                         key={order.intentId}
-                        initial={{ opacity: 0, x: -100, position: 'absolute', top: 0 }}
-                        animate={{ opacity: 1, x: 0, position: 'relative' }}
-                        exit={{ opacity: 0, x: 100, position: 'absolute', top: 0 }}
-                        transition={{ duration: 0.5 }}
+                        initial={{ opacity: 0, x: -100, position: 'absolute', top: index * 20 }}
+                        animate={{ opacity: 1, x: 0, position: 'relative', top: index * 4, }}
+                        exit={{ opacity: 0, x: 100, position: 'absolute', top: index * 20, }}
+                        transition={transitionConfig}
                     >
                         <div key={order.intentId} className="flex items-center justify-between mb-1 p-1 bg-secondBrand rounded-lg shadow-md">
                             <div className="flex items-center w-1/2">

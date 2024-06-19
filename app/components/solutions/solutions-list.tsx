@@ -9,6 +9,10 @@ interface Props {
     selectedSolutionId: string;
     handleSelectSolution: any;
 }
+const transitionConfig = {
+    duration: 0.6,
+    ease: [0.43, 0.13, 0.23, 0.66],
+};
 
 export const SolutionsList:FC<Props> = ({currentBatch, selectedSolutionId, handleSelectSolution}) => {
 
@@ -18,14 +22,16 @@ export const SolutionsList:FC<Props> = ({currentBatch, selectedSolutionId, handl
             <AnimatePresence >
                 {currentBatch.solutions.map((solution: ISolution, index:number) =>
                     <motion.div
-                        key={solution.agent.name}
-                        initial={{ opacity: 0, x: -100, position: 'absolute', top: 0 }}
-                        animate={{ opacity: 1, x: 0, position: 'relative' }}
-                        exit={{ opacity: 0, x: 100, position: 'absolute', top: 0 }}
-                        transition={{ duration: 0.5 }}
+                        //need to have unique key for good animation
+                        key={solution.agent.name + solution.score}
+                        initial={{ opacity: 0, x: -100, position: 'absolute', top: index * 20 }}
+                        animate={{ opacity: 1, x: 0, position: 'relative', top: index * 4,  }}
+                        exit={{ opacity: 0, x: 100, position: 'absolute', top: index * 20,   }}
+                        transition={transitionConfig}
                     >
                         <SolutionItem
-                            key={solution.agent.name}
+                            //need to have unique key for good animation
+                            key={solution.agent.name + solution.score}
                             solution={solution}
                             index={index}
                             isSelected={solution.agent.name === selectedSolutionId}
