@@ -1,10 +1,10 @@
-## Urani Arena v0.1
+## Urani Orderbook MVP
 
 <br>
 
-#### Graph infrastructure for batch competitions, as demonstrated during the demo day at the **<a href="https://www.loom.com/share/41396d9ef04e4a86bce179285d47dde6?sid=a7866556-53af-4bdd-954f-be840913afbd">Solana Colosseum Accelerator</a>**. 
+#### 👉🏼 Quick and dirty proof-of-concept for the **<a href="https://www.loom.com/share/41396d9ef04e4a86bce179285d47dde6?sid=a7866556-53af-4bdd-954f-be840913afbd">Solana Colosseum Accelerator</a>**. 
 
-#### **Author: Sage ([Griffin Howllet](https://github.com/0xDualCube))**.
+#### 👉🏼 It presents our vision for a graph infrastructure for batch competitions, establishing an arena for agents and gamifying DeFi. **Author: Sage ([Griffin Howllet](https://github.com/0xDualCube))**.
 
 
 
